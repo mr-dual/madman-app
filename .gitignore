@@ -1,0 +1,23 @@
+# Gradle build outputs and caches
+.gradle/
+build/
+app/build/
+
+# Local configuration files (contains your local SDK paths)
+local.properties
+
+# Android Studio / IntelliJ files (just in case they sneak in)
+.idea/
+*.iml
+.modules/
+
+# CMake / Native compilation build junk
+.cxx/
+*.so
+*.a
+*.o
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
