@@ -20,12 +20,8 @@ android {
             cmake {
                 arguments(
                     "-DANDROID_STL=c++_shared", 
-                    "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
-                    "-DCMAKE_C_COMPILER=/data/data/com.termux/files/usr/bin/clang",
-                    "-DCMAKE_CXX_COMPILER=/data/data/com.termux/files/usr/bin/clang++",
-                    "-DCMAKE_MAKE_PROGRAM=/data/data/com.termux/files/usr/bin/ninja"
                 )
-                cppFlags("-std=c++17")
+                cppFlags("-std=c++20")
             }
         }
     }
