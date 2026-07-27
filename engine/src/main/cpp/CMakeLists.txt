@@ -9,7 +9,7 @@ include(FetchContent)
 FetchContent_Declare(
     VulkanHeaders
     GIT_REPOSITORY https://github.com/KhronosGroup/Vulkan-Headers.git
-    GIT_TAG        v1.3.275 # Or match your installed Vulkan driver version
+    GIT_TAG        v1.3.275 
 )
 FetchContent_MakeAvailable(VulkanHeaders)
 
@@ -20,8 +20,8 @@ add_library(madman_engine SHARED
 
 target_link_libraries(madman_engine
     PRIVATE
-        Vulkan::Headers # Adds vulkan/vulkan.hpp to include path automatically
-        vulkan          # NDK Vulkan loader (libvulkan.so)
+        Vulkan::Headers 
+        vulkan          
         android
         log
 )

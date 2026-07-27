@@ -17,6 +17,7 @@ JNIEXPORT void JNICALL Java_com_madman_engine_MadmanJni_initialize(
   ANativeWindow *window = ANativeWindow_fromSurface(env, surface);
   LOGI("Kotlin passed the surface to C++!");
   gEngine.setWindow(window);
+  gEngine.initVulkan();
   gEngine.start();
 }
 
