@@ -20,6 +20,7 @@ android {
             cmake {
                 arguments(
                     "-DANDROID_STL=c++_shared", 
+                    "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
                 )
                 cppFlags("-std=c++20")
             }

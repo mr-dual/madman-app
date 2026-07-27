@@ -7,28 +7,23 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include(FetchContent)
 
 FetchContent_Declare(
-    VulkanHpp
-    GIT_REPOSITORY https://github.com/KhronosGroup/Vulkan-Hpp.git
-    GIT_TAG        v1.3.275
+    VulkanHeaders
+    GIT_REPOSITORY https://github.com/KhronosGroup/Vulkan-Headers.git
+    GIT_TAG        v1.3.275 # Or match your installed Vulkan driver version
 )
-FetchContent_MakeAvailable(VulkanHpp)
+FetchContent_MakeAvailable(VulkanHeaders)
 
 add_library(madman_engine SHARED
     main.cpp
     Engine.cpp
 )
 
-target_include_directories(madman_engine
-    PRIVATE
-        ${vulkanhpp_SOURCE_DIR}
-        ${vulkanhpp_SOURCE_DIR}/vulkan
-)
-
 target_link_libraries(madman_engine
     PRIVATE
-        vulkan          # Vulkan Driver (NDK)
-        android         # Native display context
-        log             # Console output
+        Vulkan::Headers # Adds vulkan/vulkan.hpp to include path automatically
+        vulkan          # NDK Vulkan loader (libvulkan.so)
+        android
+        log
 )
 
 target_precompile_headers(madman_engine PRIVATE

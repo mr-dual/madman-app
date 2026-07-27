@@ -1,5 +1,6 @@
 #include "Engine.hpp"
 #include <android/log.h>
+#include <vulkan/vulkan.hpp>
 
 #define LOG_TAG "MadmanEngine"
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)

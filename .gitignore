@@ -16,6 +16,7 @@ local.properties
 *.so
 *.a
 *.o
+.cache/
 
 # OS generated files
 .DS_Store
