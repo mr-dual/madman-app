@@ -2,6 +2,7 @@
 
 #include <android/native_window.h>
 #include <atomic>
+#include <optional>
 #include <thread>
 #include <vulkan/vulkan_raii.hpp>
 
@@ -19,8 +20,8 @@ private:
   void renderLoop();
 
 public:
-  Engine();
-  ~Engine();
+  // Engine();
+  //~Engine();
 
   void setWindow(ANativeWindow *win);
   void start();

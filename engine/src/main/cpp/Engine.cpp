@@ -1,8 +1,15 @@
 #include "Engine.hpp"
 #include "util/Log.hpp"
-#include "vulkan/vulkan.hpp"
-#include "vulkan/vulkan_core.h"
-#include <vulkan/vulkan_raii.hpp>
+#include <cstdint>
+#include <vector>
+
+const std::vector<char const *> validationLayers{"VK_LAYER_KHRONOS_validation"};
+
+#ifdef NDEBUG
+constexpr bool enableValidationLayers = false;
+#else
+constexpr bool enableValidationLayers = true;
+#endif
 
 //====================================================================
 // Lifecycle & Setup
@@ -12,16 +19,43 @@ void Engine::setWindow(ANativeWindow *win) { window = win; }
 
 void Engine::initVulkan() {
 
-  if (*instance) {
+  if (*instance != nullptr) {
     LOGD("Instance exists, skipping creation.");
     return;
   }
+
+  std::vector<char const *> requiredLayers;
+
+  if (enableValidationLayers) {
+    requiredLayers.assign(validationLayers.begin(), validationLayers.end());
+  }
+
+  auto layerProperties = context.enumerateInstanceLayerProperties();
+
+  for (const auto &requiredLayer : requiredLayers) {
+    bool found = false;
+
+    for (const auto &layerProperty : layerProperties) {
+      if (strcmp(requiredLayer, layerProperty.layerName.data()) == 0) {
+        found = true;
+        break;
+      }
+    }
+
+    if (!found) {
+      LOGE("Validation Layer %s not found.", requiredLayer);
+      return;
+    }
+  }
+
   try {
     constexpr vk::ApplicationInfo appInfo(
         "Madman", VK_MAKE_VERSION(0, 1, 0), "MadmanEngine",
         VK_MAKE_VERSION(0, 1, 0), vk::ApiVersion10);
 
-    vk::InstanceCreateInfo createInfo({}, &appInfo);
+    vk::InstanceCreateInfo createInfo(
+        {}, &appInfo, static_cast<uint32_t>(requiredLayers.size()),
+        requiredLayers.data());
 
     instance = vk::raii::Instance(context, createInfo);
 

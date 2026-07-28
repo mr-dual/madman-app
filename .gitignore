@@ -22,3 +22,5 @@ local.properties
 .DS_Store
 Thumbs.db
 
+# JNI Libraries
+*/src/*/jniLibs
