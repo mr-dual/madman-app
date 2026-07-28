@@ -1,16 +1,51 @@
 #include "Engine.hpp"
 #include "util/Log.hpp"
-#include <cstdint>
+#include <string>
 #include <vector>
+
+#ifdef NDEBUG
+constexpr bool isDebug = false;
+#else
+constexpr bool isDebug = true;
+#endif
+
+//====================================================================
+//  Debug Callback
+//====================================================================
+namespace {
 
 const std::vector<char const *> validationLayers{"VK_LAYER_KHRONOS_validation"};
 
-#ifdef NDEBUG
-constexpr bool enableValidationLayers = false;
-#else
-constexpr bool enableValidationLayers = true;
-#endif
+static VKAPI_ATTR VkBool32 VKAPI_CALL
+debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+              VkDebugUtilsMessageTypeFlagsEXT messageType,
+              const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
+              void *pUserData) {
 
+  auto cppType = static_cast<vk::DebugUtilsMessageTypeFlagsEXT>(messageType);
+  std::string typeStr = vk::to_string(cppType);
+
+  auto cppSeverity =
+      static_cast<vk::DebugUtilsMessageSeverityFlagBitsEXT>(messageSeverity);
+
+  switch (cppSeverity) {
+  case vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning:
+    LOGW("[%s]: %s", typeStr.c_str(), pCallbackData->pMessage);
+    break;
+
+  case vk::DebugUtilsMessageSeverityFlagBitsEXT::eError:
+    LOGE("[%s]: %s", typeStr.c_str(), pCallbackData->pMessage);
+    break;
+
+  default:
+    LOGI("[%s]: %s", typeStr.c_str(), pCallbackData->pMessage);
+    break;
+  }
+
+  return VK_FALSE;
+}
+
+} // namespace
 //====================================================================
 // Lifecycle & Setup
 //====================================================================
@@ -24,29 +59,9 @@ void Engine::initVulkan() {
     return;
   }
 
-  std::vector<char const *> requiredLayers;
+  std::vector<char const *> requiredLayers = getRequiredLayers();
 
-  if (enableValidationLayers) {
-    requiredLayers.assign(validationLayers.begin(), validationLayers.end());
-  }
-
-  auto layerProperties = context.enumerateInstanceLayerProperties();
-
-  for (const auto &requiredLayer : requiredLayers) {
-    bool found = false;
-
-    for (const auto &layerProperty : layerProperties) {
-      if (strcmp(requiredLayer, layerProperty.layerName.data()) == 0) {
-        found = true;
-        break;
-      }
-    }
-
-    if (!found) {
-      LOGE("Validation Layer %s not found.", requiredLayer);
-      return;
-    }
-  }
+  std::vector<char const *> extensions = getRequiredExtensions();
 
   try {
     constexpr vk::ApplicationInfo appInfo(
@@ -55,11 +70,31 @@ void Engine::initVulkan() {
 
     vk::InstanceCreateInfo createInfo(
         {}, &appInfo, static_cast<uint32_t>(requiredLayers.size()),
-        requiredLayers.data());
+        requiredLayers.data(), static_cast<uint32_t>(extensions.size()),
+        extensions.data());
 
     instance = vk::raii::Instance(context, createInfo);
 
     LOGD("Instance created!");
+
+    if constexpr (isDebug) {
+
+      vk::DebugUtilsMessageSeverityFlagsEXT severityFlags(
+          vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning |
+          vk::DebugUtilsMessageSeverityFlagBitsEXT::eError);
+
+      vk::DebugUtilsMessageTypeFlagsEXT messageTypeFlags(
+          vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral |
+          vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance |
+          vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation);
+
+      vk::DebugUtilsMessengerCreateInfoEXT debugUtilsMessengerCreateInfoEXT(
+          {}, severityFlags, messageTypeFlags, &debugCallback);
+
+      debugMessenger = instance.createDebugUtilsMessengerEXT(
+          debugUtilsMessengerCreateInfoEXT);
+      LOGD("Debug Messenger Initialized!");
+    }
 
   } catch (const vk::SystemError &err) {
     LOGE("Vulkan System Error: %s at line %d", err.what(), err.code().value());
@@ -67,6 +102,49 @@ void Engine::initVulkan() {
   } catch (const std::exception &err) {
     LOGE("Error: %s", err.what());
   }
+}
+
+//====================================================================
+//  Get Extensions and Layers
+//====================================================================
+
+std::vector<char const *> Engine::getRequiredLayers() {
+  if constexpr (!isDebug) {
+    return {};
+  } else {
+
+    auto layerProperties = context.enumerateInstanceLayerProperties();
+
+    for (const auto &validationLayer : validationLayers) {
+      bool found = false;
+
+      for (const auto &layerProperty : layerProperties) {
+        if (strcmp(validationLayer, layerProperty.layerName.data()) == 0) {
+          found = true;
+          break;
+        }
+      }
+
+      if (!found) {
+        LOGE("Validation Layer %s not found.", validationLayer);
+        return {};
+      }
+    }
+
+    return validationLayers;
+  }
+}
+
+std::vector<char const *> Engine::getRequiredExtensions() {
+
+  std::vector<char const *> extensions = {"VK_KHR_surface",
+                                          "VK_KHR_android_surface"};
+
+  if constexpr (isDebug) {
+    extensions.push_back(vk::EXTDebugUtilsExtensionName);
+  }
+
+  return extensions;
 }
 
 //====================================================================
