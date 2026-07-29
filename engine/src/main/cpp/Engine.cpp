@@ -3,49 +3,6 @@
 #include <string>
 #include <vector>
 
-#ifdef NDEBUG
-constexpr bool isDebug = false;
-#else
-constexpr bool isDebug = true;
-#endif
-
-//====================================================================
-//  Debug Callback
-//====================================================================
-namespace {
-
-const std::vector<char const *> validationLayers{"VK_LAYER_KHRONOS_validation"};
-
-static VKAPI_ATTR VkBool32 VKAPI_CALL
-debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-              VkDebugUtilsMessageTypeFlagsEXT messageType,
-              const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
-              void *pUserData) {
-
-  auto cppType = static_cast<vk::DebugUtilsMessageTypeFlagsEXT>(messageType);
-  std::string typeStr = vk::to_string(cppType);
-
-  auto cppSeverity =
-      static_cast<vk::DebugUtilsMessageSeverityFlagBitsEXT>(messageSeverity);
-
-  switch (cppSeverity) {
-  case vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning:
-    LOGW("[%s]: %s", typeStr.c_str(), pCallbackData->pMessage);
-    break;
-
-  case vk::DebugUtilsMessageSeverityFlagBitsEXT::eError:
-    LOGE("[%s]: %s", typeStr.c_str(), pCallbackData->pMessage);
-    break;
-
-  default:
-    LOGI("[%s]: %s", typeStr.c_str(), pCallbackData->pMessage);
-    break;
-  }
-
-  return VK_FALSE;
-}
-
-} // namespace
 //====================================================================
 // Lifecycle & Setup
 //====================================================================
@@ -62,40 +19,11 @@ Engine &Engine::initVulkan() {
     return *this;
   }
 
-  std::vector<char const *> requiredLayers = getRequiredLayers();
-  std::vector<char const *> extensions = getRequiredExtensions();
-
   try {
-    constexpr vk::ApplicationInfo appInfo(
-        "Madman", VK_MAKE_VERSION(0, 1, 0), "MadmanEngine",
-        VK_MAKE_VERSION(0, 1, 0), vk::ApiVersion10);
-
-    vk::InstanceCreateInfo createInfo(
-        {}, &appInfo, static_cast<uint32_t>(requiredLayers.size()),
-        requiredLayers.data(), static_cast<uint32_t>(extensions.size()),
-        extensions.data());
-
-    instance = vk::raii::Instance(context, createInfo);
-
-    LOGD("Instance created!");
+    setInstance();
 
     if constexpr (isDebug) {
-
-      vk::DebugUtilsMessageSeverityFlagsEXT severityFlags(
-          vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning |
-          vk::DebugUtilsMessageSeverityFlagBitsEXT::eError);
-
-      vk::DebugUtilsMessageTypeFlagsEXT messageTypeFlags(
-          vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral |
-          vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance |
-          vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation);
-
-      vk::DebugUtilsMessengerCreateInfoEXT debugUtilsMessengerCreateInfoEXT(
-          {}, severityFlags, messageTypeFlags, &debugCallback);
-
-      debugMessenger = instance.createDebugUtilsMessengerEXT(
-          debugUtilsMessengerCreateInfoEXT);
-      LOGD("Debug Messenger Initialized!");
+      setDebugMessenger();
     }
 
   } catch (const vk::SystemError &err) {
@@ -108,15 +36,34 @@ Engine &Engine::initVulkan() {
   return *this;
 }
 
+Engine &Engine::setInstance() {
+  std::vector<char const *> requiredLayers = getRequiredLayers();
+  std::vector<char const *> extensions = getRequiredExtensions();
+
+  constexpr vk::ApplicationInfo appInfo(
+      "Madman", VK_MAKE_VERSION(0, 1, 0), "MadmanEngine",
+      VK_MAKE_VERSION(0, 1, 0), vk::ApiVersion10);
+
+  vk::InstanceCreateInfo createInfo(
+      {}, &appInfo, static_cast<uint32_t>(requiredLayers.size()),
+      requiredLayers.data(), static_cast<uint32_t>(extensions.size()),
+      extensions.data());
+
+  instance = vk::raii::Instance(context, createInfo);
+
+  LOGD("Instance created!");
+
+  return *this;
+};
 //====================================================================
 //  Get Extensions and Layers
 //====================================================================
 
 std::vector<char const *> Engine::getRequiredLayers() {
-  if constexpr (!isDebug) {
-    return {};
-  } else {
+  if constexpr (isDebug) {
 
+    const std::vector<char const *> validationLayers{
+        "VK_LAYER_KHRONOS_validation"};
     auto layerProperties = context.enumerateInstanceLayerProperties();
 
     for (const auto &validationLayer : validationLayers) {
@@ -134,9 +81,9 @@ std::vector<char const *> Engine::getRequiredLayers() {
         return {};
       }
     }
-
     return validationLayers;
   }
+  return {};
 }
 
 std::vector<char const *> Engine::getRequiredExtensions() {
@@ -213,4 +160,56 @@ Engine &Engine::renderLoop() {
   LOGD("Render stopped in cpp.");
 
   return *this;
+}
+
+//====================================================================
+//  Debug Functions
+//====================================================================
+Engine &Engine::setDebugMessenger() {
+
+  vk::DebugUtilsMessageSeverityFlagsEXT severityFlags(
+      vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning |
+      vk::DebugUtilsMessageSeverityFlagBitsEXT::eError);
+
+  vk::DebugUtilsMessageTypeFlagsEXT messageTypeFlags(
+      vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral |
+      vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance |
+      vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation);
+
+  vk::DebugUtilsMessengerCreateInfoEXT debugUtilsMessengerCreateInfoEXT(
+      {}, severityFlags, messageTypeFlags, &debugCallback);
+
+  debugMessenger =
+      instance.createDebugUtilsMessengerEXT(debugUtilsMessengerCreateInfoEXT);
+  LOGD("Debug Messenger Initialized!");
+  return *this;
+}
+
+VKAPI_ATTR VkBool32 VKAPI_CALL
+Engine::debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+                      VkDebugUtilsMessageTypeFlagsEXT messageType,
+                      const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
+                      void *pUserData) {
+
+  auto cppType = static_cast<vk::DebugUtilsMessageTypeFlagsEXT>(messageType);
+  std::string typeStr = vk::to_string(cppType);
+
+  auto cppSeverity =
+      static_cast<vk::DebugUtilsMessageSeverityFlagBitsEXT>(messageSeverity);
+
+  switch (cppSeverity) {
+  case vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning:
+    LOGW("[%s]: %s", typeStr.c_str(), pCallbackData->pMessage);
+    break;
+
+  case vk::DebugUtilsMessageSeverityFlagBitsEXT::eError:
+    LOGE("[%s]: %s", typeStr.c_str(), pCallbackData->pMessage);
+    break;
+
+  default:
+    LOGI("[%s]: %s", typeStr.c_str(), pCallbackData->pMessage);
+    break;
+  }
+
+  return VK_FALSE;
 }
