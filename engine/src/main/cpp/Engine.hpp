@@ -19,15 +19,15 @@ private:
 
   std::vector<char const *> getRequiredLayers();
   std::vector<char const *> getRequiredExtensions();
-  void renderLoop();
+  Engine &renderLoop();
 
 public:
   // Engine();
   //~Engine();
 
-  void setWindow(ANativeWindow *win);
-  void start();
-  void stop();
-  void resize(int h, int w);
-  void initVulkan();
+  Engine &setWindow(ANativeWindow *win);
+  Engine &start();
+  Engine &stop();
+  Engine &resize(int h, int w);
+  Engine &initVulkan();
 };

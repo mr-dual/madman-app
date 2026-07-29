@@ -50,17 +50,19 @@ debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
 // Lifecycle & Setup
 //====================================================================
 
-void Engine::setWindow(ANativeWindow *win) { window = win; }
+Engine &Engine::setWindow(ANativeWindow *win) {
+  window = win;
+  return *this;
+}
 
-void Engine::initVulkan() {
+Engine &Engine::initVulkan() {
 
   if (*instance != nullptr) {
     LOGD("Instance exists, skipping creation.");
-    return;
+    return *this;
   }
 
   std::vector<char const *> requiredLayers = getRequiredLayers();
-
   std::vector<char const *> extensions = getRequiredExtensions();
 
   try {
@@ -102,6 +104,8 @@ void Engine::initVulkan() {
   } catch (const std::exception &err) {
     LOGE("Error: %s", err.what());
   }
+
+  return *this;
 }
 
 //====================================================================
@@ -151,19 +155,21 @@ std::vector<char const *> Engine::getRequiredExtensions() {
 //  Engine State Controls
 //====================================================================
 
-void Engine::start() {
+Engine &Engine::start() {
   if (isRunning)
-    return;
+    return *this;
 
   initVulkan();
 
   isRunning = true;
   renderThread = std::thread(&Engine::renderLoop, this);
+
+  return *this;
 }
 
-void Engine::stop() {
+Engine &Engine::stop() {
   if (!isRunning)
-    return;
+    return *this;
 
   isRunning = false;
 
@@ -175,20 +181,24 @@ void Engine::stop() {
     ANativeWindow_release(window);
     window = nullptr;
   }
+
+  return *this;
 }
 
-void Engine::resize(int h, int w) {
+Engine &Engine::resize(int h, int w) {
   height = h;
   width = w;
 
   LOGD("resized from cpp with dimentions %dx%d", height.load(), width.load());
+
+  return *this;
 }
 
 //====================================================================
 //  Engine Render Loop
 //====================================================================
 
-void Engine::renderLoop() {
+Engine &Engine::renderLoop() {
   LOGD("Render started in cpp.");
 
   while (isRunning) {
@@ -201,4 +211,6 @@ void Engine::renderLoop() {
   }
 
   LOGD("Render stopped in cpp.");
+
+  return *this;
 }

@@ -16,8 +16,7 @@ JNIEXPORT void JNICALL Java_com_madman_engine_MadmanJni_initialize(
     JNIEnv *env, jobject thiz, jobject surface) {
   ANativeWindow *window = ANativeWindow_fromSurface(env, surface);
   LOGI("Kotlin passed the surface to C++!");
-  gEngine.setWindow(window);
-  gEngine.start();
+  gEngine.setWindow(window).start();
 }
 
 JNIEXPORT void JNICALL Java_com_madman_engine_MadmanJni_resize(JNIEnv *env,
