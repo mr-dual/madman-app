@@ -1,5 +1,6 @@
 #include "Engine.hpp"
 #include "util/Log.hpp"
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -12,19 +13,16 @@ Engine &Engine::setWindow(ANativeWindow *win) {
   return *this;
 }
 
-Engine &Engine::initVulkan() {
-
+void Engine::initVulkan() {
   if (*instance != nullptr) {
     LOGD("Instance exists, skipping creation.");
-    return *this;
   }
 
   try {
     setInstance();
-
-    if constexpr (isDebug) {
+    if constexpr (isDebug)
       setDebugMessenger();
-    }
+    setPhysicalDevice();
 
   } catch (const vk::SystemError &err) {
     LOGE("Vulkan System Error: %s at line %d", err.what(), err.code().value());
@@ -32,11 +30,9 @@ Engine &Engine::initVulkan() {
   } catch (const std::exception &err) {
     LOGE("Error: %s", err.what());
   }
-
-  return *this;
 }
 
-Engine &Engine::setInstance() {
+void Engine::setInstance() {
   std::vector<char const *> requiredLayers = getRequiredLayers();
   std::vector<char const *> extensions = getRequiredExtensions();
 
@@ -52,9 +48,25 @@ Engine &Engine::setInstance() {
   instance = vk::raii::Instance(context, createInfo);
 
   LOGD("Instance created!");
-
-  return *this;
 };
+
+void Engine::setPhysicalDevice() {
+  auto physicalDevices = instance.enumeratePhysicalDevices();
+
+  if (physicalDevices.empty())
+    throw std::runtime_error("Failed to find GPUs with vulkan support!");
+
+  for (const auto &physicalDevice : physicalDevices) {
+    if (isDeviceSupported(physicalDevice)) {
+
+    } else {
+      continue;
+    }
+  }
+}
+
+bool Engine::isDeviceSupported(const vk::raii::PhysicalDevice &physicalDevice) {
+}
 //====================================================================
 //  Get Extensions and Layers
 //====================================================================
@@ -145,7 +157,7 @@ Engine &Engine::resize(int h, int w) {
 //  Engine Render Loop
 //====================================================================
 
-Engine &Engine::renderLoop() {
+void Engine::renderLoop() {
   LOGD("Render started in cpp.");
 
   while (isRunning) {
@@ -158,14 +170,12 @@ Engine &Engine::renderLoop() {
   }
 
   LOGD("Render stopped in cpp.");
-
-  return *this;
 }
 
 //====================================================================
 //  Debug Functions
 //====================================================================
-Engine &Engine::setDebugMessenger() {
+void Engine::setDebugMessenger() {
 
   vk::DebugUtilsMessageSeverityFlagsEXT severityFlags(
       vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning |
@@ -181,8 +191,8 @@ Engine &Engine::setDebugMessenger() {
 
   debugMessenger =
       instance.createDebugUtilsMessengerEXT(debugUtilsMessengerCreateInfoEXT);
+
   LOGD("Debug Messenger Initialized!");
-  return *this;
 }
 
 VKAPI_ATTR VkBool32 VKAPI_CALL

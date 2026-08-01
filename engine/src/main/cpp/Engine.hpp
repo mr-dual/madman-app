@@ -18,6 +18,7 @@ private:
   vk::raii::Context context;
   vk::raii::Instance instance = nullptr;
   vk::raii::DebugUtilsMessengerEXT debugMessenger = nullptr;
+  vk::raii::PhysicalDevice physicalDevice = nullptr;
 
   std::thread renderThread;
   std::atomic<bool> isRunning{false};
@@ -27,14 +28,15 @@ private:
   std::vector<char const *> getRequiredLayers();
   std::vector<char const *> getRequiredExtensions();
 
-  Engine &initVulkan();
-  Engine &setInstance();
+  void initVulkan();
+  void setInstance();
+  void setPhysicalDevice();
+  bool isDeviceSupported(const vk::raii::PhysicalDevice &physicalDevice);
 
-  Engine &renderLoop();
+  void renderLoop();
 
   // Debug Mode Stuff
-
-  Engine &setDebugMessenger();
+  void setDebugMessenger();
   static VKAPI_ATTR VkBool32 VKAPI_CALL
   debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
                 VkDebugUtilsMessageTypeFlagsEXT messageType,

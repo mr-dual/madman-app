@@ -13,10 +13,12 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(VulkanHeaders)
 
-add_library(madman_engine SHARED
-    main.cpp
-    Engine.cpp
+add_library(madman_engine STATIC Engine.cpp
 )
+
+target_compile_options(madman_engine PRIVATE -ffunction-sections -fdata-sections)
+
+target_include_directories(madman_engine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 target_link_libraries(madman_engine
     PRIVATE
@@ -24,10 +26,5 @@ target_link_libraries(madman_engine
         vulkan          
         android
         log
-)
-
-target_precompile_headers(madman_engine PRIVATE
-    <vulkan/vulkan.hpp>
-    <vulkan/vulkan_raii.hpp>
 )
 

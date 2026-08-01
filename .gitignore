@@ -12,6 +12,7 @@ local.properties
 .modules/
 
 # CMake / Native compilation build junk
+compile_commands.json
 .cxx/
 *.so
 *.a
