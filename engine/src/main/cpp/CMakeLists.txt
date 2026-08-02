@@ -13,8 +13,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(VulkanHeaders)
 
-add_library(madman_engine STATIC Engine.cpp
-)
+add_library(madman_engine STATIC Engine.cpp)
 
 target_compile_options(madman_engine PRIVATE -ffunction-sections -fdata-sections)
 

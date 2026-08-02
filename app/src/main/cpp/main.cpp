@@ -2,51 +2,57 @@
 #include <game-activity/native_app_glue/android_native_app_glue.h>
 #include <game-text-input/gametextinput.h>
 
-#include <vulkan/vulkan.h>
-#include <vulkan/vulkan_android.h>
-
+#include "Engine.hpp"
 #include "util/Log.hpp"
 
-// Your native main entry point (replaces MainActivity.kt)
-void android_main(struct android_app *app) {
-  LOGI("Madman Engine Started!");
+//====================================================================
+// Handle Window Initialization and Inputs
+//====================================================================
 
-  // Wait for the window to be initialized by Android
+inline void windowInitialized(android_app *&app) {
   while (app->window == nullptr) {
     int events;
-    struct android_poll_source *source;
+    android_poll_source *source;
+
     if (ALooper_pollOnce(-1, nullptr, &events, (void **)&source) >= 0) {
       if (source != nullptr) {
         source->process(app, source);
       }
     }
   }
+}
 
-  // Pass app->window (ANativeWindow*) straight to Vulkan surface creation!
-  // VkAndroidSurfaceCreateInfoKHR createInfo{ ... };
-  // createInfo.window = app->window;
+inline bool handleInput(android_app *&app) {
+  int events;
+  android_poll_source *source;
 
-  bool running = true;
-
-  // Core Game Loop
-  while (running) {
-    // 1. Poll OS / Touch / Motion Events
-    int events;
-    struct android_poll_source *source;
-
-    // Non-blocking poll (timeout = 0)
-    while (ALooper_pollOnce(0, nullptr, &events, (void **)&source) >= 0) {
-      if (source != nullptr) {
-        source->process(app, source);
-      }
-
-      if (app->destroyRequested != 0) {
-        running = false;
-        break;
-      }
+  while (ALooper_pollOnce(-1, nullptr, &events, (void **)&source) >= 0) {
+    if (source != nullptr) {
+      source->process(app, source);
     }
 
-    // 2. Render Vulkan Frame
-    // renderer.drawFrame();
+    if (app->destroyRequested != 0) {
+      return false;
+    }
   }
+  return true;
+}
+
+//====================================================================
+// Android Main
+//====================================================================
+
+void android_main(struct android_app *app) {
+  LOGD("Madman Engine Started!");
+
+  windowInitialized(app);
+
+  static Engine2d gEngine(app->window);
+  gEngine.start();
+
+  while (handleInput(app)) {
+    continue;
+  }
+
+  gEngine.stop();
 }

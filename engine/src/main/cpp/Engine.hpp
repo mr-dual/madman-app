@@ -3,7 +3,7 @@
 #include <android/native_window.h>
 #include <atomic>
 #include <thread>
-#include <vulkan/vulkan_raii.hpp>
+// #include <vulkan/vulkan.h>
 
 #ifdef NDEBUG
 constexpr bool isDebug = false;
@@ -12,13 +12,14 @@ constexpr bool isDebug = true;
 #endif
 
 class Engine {
-private:
-  ANativeWindow *window = nullptr;
+protected:
+  ANativeWindow *window;
 
-  vk::raii::Context context;
-  vk::raii::Instance instance = nullptr;
-  vk::raii::DebugUtilsMessengerEXT debugMessenger = nullptr;
-  vk::raii::PhysicalDevice physicalDevice = nullptr;
+private:
+  // vk::raii::Context context;
+  // vk::raii::Instance instance = nullptr;
+  // vk::raii::DebugUtilsMessengerEXT debugMessenger = nullptr;
+  // vk::raii::PhysicalDevice physicalDevice = nullptr;
 
   std::thread renderThread;
   std::atomic<bool> isRunning{false};
@@ -31,24 +32,33 @@ private:
   void initVulkan();
   void setInstance();
   void setPhysicalDevice();
-  bool isDeviceSupported(const vk::raii::PhysicalDevice &physicalDevice);
+  // bool isDeviceSupported(const vk::raii::PhysicalDevice &physicalDevice);
 
   void renderLoop();
 
   // Debug Mode Stuff
-  void setDebugMessenger();
-  static VKAPI_ATTR VkBool32 VKAPI_CALL
-  debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-                VkDebugUtilsMessageTypeFlagsEXT messageType,
-                const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
-                void *pUserData);
+  // void setDebugMessenger();
+  // static VKAPI_ATTR VkBool32 VKAPI_CALL
+  // debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+  //               VkDebugUtilsMessageTypeFlagsEXT messageType,
+  //               const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
+  //               void *pUserData);
 
 public:
-  // Engine();
+  Engine(ANativeWindow *win) : window(win) {};
   //~Engine();
 
-  Engine &setWindow(ANativeWindow *win);
-  Engine &start();
-  Engine &stop();
-  Engine &resize(int h, int w);
+  void start();
+  void stop();
+  void resize(int h, int w);
+};
+
+class Engine2d : public Engine {
+public:
+  Engine2d(ANativeWindow *win) : Engine(win) {};
+};
+
+class Engine3d : public Engine {
+public:
+  Engine3d(ANativeWindow *win) : Engine(win) {};
 };
