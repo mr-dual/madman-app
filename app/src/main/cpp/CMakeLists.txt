@@ -12,6 +12,8 @@ add_library(app_main SHARED
     main.cpp
 )
 
+target_link_options(app_main PRIVATE -Wl,-u,android_main)
+
 target_link_libraries(app_main
     PRIVATE
         game-activity::game-activity_static
@@ -20,3 +22,4 @@ target_link_libraries(app_main
         android 
         log
 )
+

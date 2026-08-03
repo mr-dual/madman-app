@@ -1,5 +1,5 @@
 #include <game-activity/GameActivity.h>
-#include <game-activity/native_app_glue/android_native_app_glue.h>
+#include <game-activity/native_app_glue/android_native_app_glue.c>
 #include <game-text-input/gametextinput.h>
 
 #define APPLICATION_NAME "MadmanApp"
@@ -15,6 +15,7 @@
 //====================================================================
 
 inline void initWindow(android_app *&app) {
+  LOGD("Window inktialized!");
   while (app->window == nullptr) {
     int events;
     android_poll_source *source;
@@ -28,6 +29,8 @@ inline void initWindow(android_app *&app) {
 }
 
 inline bool handleInput(android_app *&app) {
+  LOGD("Engine initialized");
+
   int events;
   android_poll_source *source;
 
@@ -46,7 +49,7 @@ inline bool handleInput(android_app *&app) {
 //====================================================================
 // Android Main
 //====================================================================
-
+extern "C" {
 void android_main(struct android_app *app) {
   LOGD("Madman Engine Started!");
 
@@ -60,4 +63,5 @@ void android_main(struct android_app *app) {
   }
 
   gEngine.stop();
+}
 }
