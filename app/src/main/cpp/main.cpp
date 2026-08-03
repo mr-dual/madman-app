@@ -2,14 +2,19 @@
 #include <game-activity/native_app_glue/android_native_app_glue.h>
 #include <game-text-input/gametextinput.h>
 
-#include "Engine.hpp"
+#define APPLICATION_NAME "MadmanApp"
+#define APP_VERSION_MAJOR 0
+#define APP_VERSION_MINOR 1
+#define APP_VERSION_PATCH 0
+
+#include "engines/Engine2d.hpp"
 #include "util/Log.hpp"
 
 //====================================================================
 // Handle Window Initialization and Inputs
 //====================================================================
 
-inline void windowInitialized(android_app *&app) {
+inline void initWindow(android_app *&app) {
   while (app->window == nullptr) {
     int events;
     android_poll_source *source;
@@ -45,7 +50,7 @@ inline bool handleInput(android_app *&app) {
 void android_main(struct android_app *app) {
   LOGD("Madman Engine Started!");
 
-  windowInitialized(app);
+  initWindow(app);
 
   static Engine2d gEngine(app->window);
   gEngine.start();

@@ -3,7 +3,7 @@
 #include <android/native_window.h>
 #include <atomic>
 #include <thread>
-// #include <vulkan/vulkan.h>
+#include <vulkan/vulkan_core.h>
 
 #ifdef NDEBUG
 constexpr bool isDebug = false;
@@ -11,26 +11,47 @@ constexpr bool isDebug = false;
 constexpr bool isDebug = true;
 #endif
 
+#ifndef APPLICATION_NAME
+#define APPLICATION_NAME "Madman"
+#endif
+
+#ifndef APP_VERSION_MAJOR
+#define APP_VERSION_MAJOR 0
+#endif
+
+#ifndef APP_VERSION_MINOR
+#define APP_VERSION_MINOR 1
+#endif
+
+#ifndef APP_VERSION_PATCH
+#define APP_VERSION_PATCH 0
+#endif
+
+#ifndef APPLICATION_VERSION
+#define APPLICATION_VERSION                                                    \
+  VK_MAKE_VERSION(APP_VERSION_MAJOR, APP_VERSION_MINOR, APP_VERSION_PATCH)
+#endif
+
 class Engine {
 protected:
   ANativeWindow *window;
 
 private:
-  // vk::raii::Context context;
-  // vk::raii::Instance instance = nullptr;
-  // vk::raii::DebugUtilsMessengerEXT debugMessenger = nullptr;
-  // vk::raii::PhysicalDevice physicalDevice = nullptr;
+  VkInstance instance = nullptr;
+  VkDebugUtilsMessengerEXT debugMessenger = nullptr;
+  VkPhysicalDevice physicalDevice = nullptr;
 
   std::thread renderThread;
   std::atomic<bool> isRunning{false};
   std::atomic<int> height{0};
   std::atomic<int> width{0};
 
-  std::vector<char const *> getRequiredLayers();
-  std::vector<char const *> getRequiredExtensions();
+  static std::vector<char const *> getRequiredLayers();
+  static std::vector<char const *> getRequiredExtensions();
 
   void initVulkan();
-  void setInstance();
+  void cleanupVulkan();
+  void createInstance();
   void setPhysicalDevice();
   // bool isDeviceSupported(const vk::raii::PhysicalDevice &physicalDevice);
 
@@ -51,14 +72,4 @@ public:
   void start();
   void stop();
   void resize(int h, int w);
-};
-
-class Engine2d : public Engine {
-public:
-  Engine2d(ANativeWindow *win) : Engine(win) {};
-};
-
-class Engine3d : public Engine {
-public:
-  Engine3d(ANativeWindow *win) : Engine(win) {};
 };

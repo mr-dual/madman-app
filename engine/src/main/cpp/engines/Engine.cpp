@@ -1,7 +1,10 @@
 #include "Engine.hpp"
 #include "util/Log.hpp"
+#include "vulkan/vulkan_core.h"
+#include <cstdint>
 #include <stdexcept>
 #include <vector>
+#include <vulkan/vulkan.h>
 
 //====================================================================
 // Lifecycle & Setup
@@ -13,7 +16,7 @@ void Engine::initVulkan() {
   // }
 
   try {
-    setInstance();
+    createInstance();
     // if constexpr (isDebug)
     //   setDebugMessenger();
     setPhysicalDevice();
@@ -27,21 +30,30 @@ void Engine::initVulkan() {
   }
 }
 
-void Engine::setInstance() {
+void Engine::createInstance() {
   std::vector<char const *> requiredLayers = getRequiredLayers();
   std::vector<char const *> extensions = getRequiredExtensions();
 
-  // constexpr vk::ApplicationInfo appInfo(
-  //     "Madman", VK_MAKE_VERSION(0, 1, 0), "MadmanEngine",
-  //     VK_MAKE_VERSION(0, 1, 0), vk::ApiVersion10);
-  //
-  // vk::InstanceCreateInfo createInfo(
-  //     {}, &appInfo, static_cast<uint32_t>(requiredLayers.size()),
-  //     requiredLayers.data(), static_cast<uint32_t>(extensions.size()),
-  //     extensions.data());
-  //
-  // instance = vk::raii::Instance(context, createInfo);
-  //
+  constexpr VkApplicationInfo appInfo{.sType =
+                                          VK_STRUCTURE_TYPE_APPLICATION_INFO,
+                                      .pApplicationName = APPLICATION_NAME,
+                                      .applicationVersion = APPLICATION_VERSION,
+                                      .pEngineName = "MadmanEngine",
+                                      .engineVersion = VK_MAKE_VERSION(0, 1, 0),
+                                      .apiVersion = VK_API_VERSION_1_0};
+
+  VkInstanceCreateInfo createInfo{
+      .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
+      .pApplicationInfo = &appInfo,
+      .enabledLayerCount = static_cast<uint32_t>(requiredLayers.size()),
+      .ppEnabledLayerNames = requiredLayers.data(),
+      .enabledExtensionCount = static_cast<uint32_t>(extensions.size()),
+      .ppEnabledExtensionNames = extensions.data()};
+
+  if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {
+    throw std::runtime_error("Failed to create Vulkan Instance");
+  }
+
   LOGD("Instance created!");
 };
 
@@ -133,6 +145,7 @@ void Engine::stop() {
     renderThread.join();
   }
 
+  cleanupVulkan();
   return;
 }
 
@@ -146,7 +159,7 @@ void Engine::resize(int h, int w) {
 }
 
 //====================================================================
-//  Engine Render Loop
+//  Engine Render Loop and Cleanup
 //====================================================================
 
 void Engine::renderLoop() {
@@ -164,6 +177,7 @@ void Engine::renderLoop() {
   LOGD("Render stopped in cpp.");
 }
 
+void Engine::cleanupVulkan() { vkDestroyInstance(instance, nullptr); }
 //====================================================================
 //  Debug Functions
 //====================================================================
