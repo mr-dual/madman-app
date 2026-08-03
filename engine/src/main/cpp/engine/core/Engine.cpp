@@ -31,29 +31,42 @@ void Engine::initVulkan() {
 }
 
 void Engine::createInstance() {
-  std::vector<char const *> requiredLayers = getRequiredLayers();
-  std::vector<char const *> extensions = getRequiredExtensions();
+  if constexpr (isDebug) {
+    uint32_t extentionCount = 0;
+    std::vector<VkExtensionProperties> extensions(extentionCount);
 
-  constexpr VkApplicationInfo appInfo{.sType =
-                                          VK_STRUCTURE_TYPE_APPLICATION_INFO,
-                                      .pApplicationName = APPLICATION_NAME,
-                                      .applicationVersion = APPLICATION_VERSION,
-                                      .pEngineName = "MadmanEngine",
-                                      .engineVersion = VK_MAKE_VERSION(0, 1, 0),
-                                      .apiVersion = VK_API_VERSION_1_0};
+    vkEnumerateInstanceExtensionProperties(nullptr, &extentionCount,
+                                           extensions.data());
 
-  VkInstanceCreateInfo createInfo{
-      .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
-      .pApplicationInfo = &appInfo,
-      .enabledLayerCount = static_cast<uint32_t>(requiredLayers.size()),
-      .ppEnabledLayerNames = requiredLayers.data(),
-      .enabledExtensionCount = static_cast<uint32_t>(extensions.size()),
-      .ppEnabledExtensionNames = extensions.data()};
+    LOGD("Enxtensions : ");
+    for (const auto &extension : extensions) {
+      LOGD("  Name: %s, Version: %d", extension.extensionName,
+           extension.specVersion);
+    }
+  } else {
+    std::vector<char const *> requiredLayers = getRequiredLayers();
+    std::vector<char const *> extensions = getRequiredExtensions();
 
-  if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {
-    throw std::runtime_error("Failed to create Vulkan Instance");
+    constexpr VkApplicationInfo appInfo{
+        .sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
+        .pApplicationName = APPLICATION_NAME,
+        .applicationVersion = APPLICATION_VERSION,
+        .pEngineName = "MadmanEngine",
+        .engineVersion = VK_MAKE_VERSION(0, 1, 0),
+        .apiVersion = VK_API_VERSION_1_0};
+
+    VkInstanceCreateInfo createInfo{
+        .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
+        .pApplicationInfo = &appInfo,
+        .enabledLayerCount = static_cast<uint32_t>(requiredLayers.size()),
+        .ppEnabledLayerNames = requiredLayers.data(),
+        .enabledExtensionCount = static_cast<uint32_t>(extensions.size()),
+        .ppEnabledExtensionNames = extensions.data()};
+
+    if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {
+      throw std::runtime_error("Failed to create Vulkan Instance");
+    }
   }
-
   LOGD("Instance created!");
 };
 
@@ -112,9 +125,9 @@ std::vector<char const *> Engine::getRequiredExtensions() {
   std::vector<char const *> extensions = {"VK_KHR_surface",
                                           "VK_KHR_android_surface"};
 
-  // if constexpr (isDebug) {
-  //   extensions.push_back(vk::EXTDebugUtilsExtensionName);
-  // }
+  if constexpr (isDebug) {
+    extensions.push_back("");
+  }
 
   return extensions;
 }

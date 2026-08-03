@@ -46,8 +46,8 @@ private:
   std::atomic<int> height{0};
   std::atomic<int> width{0};
 
-  static std::vector<char const *> getRequiredLayers();
-  static std::vector<char const *> getRequiredExtensions();
+  inline std::vector<char const *> getRequiredLayers();
+  inline std::vector<char const *> getRequiredExtensions();
 
   void initVulkan();
   void cleanupVulkan();
