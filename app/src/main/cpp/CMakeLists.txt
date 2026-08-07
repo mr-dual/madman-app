@@ -12,11 +12,16 @@ add_library(app_main SHARED
     main.cpp
 )
 
-target_link_options(app_main PRIVATE -Wl,-u,android_main)
+target_link_options(app_main PRIVATE 
+    -Wl,-u,android_main
+    -Wl,-u,GameActivity_onCreate
+)
 
 target_link_libraries(app_main
     PRIVATE
+        -Wl,--whole-archive
         game-activity::game-activity_static
+        -Wl,--no-whole-archive
         madman_engine      
         vulkan 
         android 

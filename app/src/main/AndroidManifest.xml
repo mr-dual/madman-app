@@ -7,10 +7,10 @@
     <application
         android:allowBackup="false"
         android:label="Madman Engine"
-        android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
+        android:theme="@style/Theme.AppCompat.NoActionBar">
 
         <activity
-            android:name=".MainActivity"
+            android:name="com.madman.app.MainActivity"
             android:exported="true">
 
             <meta-data
