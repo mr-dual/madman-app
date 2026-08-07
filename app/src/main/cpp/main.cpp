@@ -8,6 +8,7 @@
 #define APP_VERSION_PATCH 0
 
 #include "engine/2d/Engine2d.hpp"
+#include "engine/config/EngineConfig.hpp"
 #include "util/Log.hpp"
 
 extern "C" {
@@ -42,8 +43,6 @@ inline void initWindow(android_app *&app) {
 }
 
 inline bool handleInput(android_app *&app) {
-  LOGD("Engine initialized");
-
   int events;
   android_poll_source *source;
 
@@ -69,6 +68,7 @@ void android_main(struct android_app *app) {
 
   initWindow(app);
 
+  static EngineConfigs engineConfig(240.0);
   static Engine2d gEngine(app->window);
   gEngine.start();
 
