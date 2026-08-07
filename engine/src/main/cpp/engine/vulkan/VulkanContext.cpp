@@ -148,8 +148,13 @@ void VulkanContext::cleanup() {
   vkDestroyInstance(instance, nullptr);
   instance = VK_NULL_HANDLE;
 }
-void VulkanContext::resize(int h, int w) {}
+void VulkanContext::resize(int h, int w) {
+  // TODO:add resize stuff.
+}
 
+void VulkanContext::render() {
+  // TODO:add render stuff.
+}
 //====================================================================
 //  Debug Functions
 //====================================================================

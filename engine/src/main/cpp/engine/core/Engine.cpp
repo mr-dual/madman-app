@@ -9,7 +9,6 @@
 Engine::Engine(ANativeWindow *win)
     : window(win), mGraphicsContext(std::make_unique<VulkanContext>()) {}
 
-// Now std::unique_ptr knows how to delete GraphicsContext
 Engine::~Engine() = default;
 
 void Engine::start() {
@@ -42,6 +41,7 @@ void Engine::resize(int h, int w) {
   height = h;
   width = w;
 
+  mGraphicsContext->resize(h, w);
   LOGD("resized from cpp with dimentions %dx%d", height.load(), width.load());
 
   return;
@@ -58,7 +58,7 @@ void Engine::renderLoop() {
     if (window != nullptr) {
       mGraphicsContext->render();
     } else {
-      LOGI("window is null");
+      LOGE("window is null");
       break;
     }
 
