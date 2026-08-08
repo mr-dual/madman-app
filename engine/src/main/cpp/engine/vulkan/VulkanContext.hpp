@@ -6,18 +6,18 @@
 class VulkanContext : public GraphicsContext {
 private:
   VkInstance instance = VK_NULL_HANDLE;
-  // VkDebugUtilsMessengerEXT debugMessenger = nullptr;
+  VkDebugUtilsMessengerEXT debugMessenger = nullptr;
   VkPhysicalDevice physicalDevice = nullptr;
 
   // bool isDeviceSupported(const vk::raii::PhysicalDevice &physicalDevice);
 
   // Debug Mode Stuff
-  // void setDebugMessenger();
-  // static VKAPI_ATTR VkBool32 VKAPI_CALL
-  // debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-  //               VkDebugUtilsMessageTypeFlagsEXT messageType,
-  //               const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
-  //               void *pUserData);
+  void setDebugMessenger();
+  static VKAPI_ATTR VkBool32 VKAPI_CALL
+  debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+                VkDebugUtilsMessageTypeFlagsEXT messageType,
+                const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
+                void *pUserData);
 
 public:
   VulkanContext() = default;

@@ -3,8 +3,11 @@
 #include "util/IsDebug.hpp"
 #include "util/Log.hpp"
 #include "vulkan/vulkan_core.h"
+#include <algorithm>
 #include <cstdint>
+#include <cstring>
 #include <stdexcept>
+#include <string>
 #include <vector>
 #include <vulkan/vulkan.h>
 
@@ -16,40 +19,82 @@ namespace {
 std::vector<char const *> getRequiredLayers() {
   if constexpr (isDebug) {
 
-    // const std::vector<char const *> validationLayers{
-    //     "VK_LAYER_KHRONOS_validation"};
-    // uint32_t layerCount = 0;
-    // vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
-    //
-    // std::vector<VkExtensionProperties> layerProperties(layerCount);
-    //
-    // for (const auto &validationLayer : validationLayers) {
-    //   bool found = false;
-    //
-    //   for (const auto &layerProperty : layerProperties) {
-    //     if (strcmp(validationLayer, layerProperty.layerName.data()) == 0) {
-    //       found = true;
-    //       break;
-    //     }
-    //   }
-    //
-    //   if (!found) {
-    //     LOGE("Validation Layer %s not found.", validationLayer);
-    //     return {};
-    //   }
-    // }
-    // return validationLayers;
+    const std::vector<char const *> validationLayers{
+        "VK_LAYER_KHRONOS_validation"};
+
+    // Get Layers from Device.
+    uint32_t layerCount = 0;
+    vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
+
+    std::vector<VkLayerProperties> layers(layerCount);
+    vkEnumerateInstanceLayerProperties(&layerCount, layers.data());
+
+    // Check if Layers are in Device .
+    for (const auto &validLayer : validationLayers) {
+      bool found = false;
+
+      for (const auto &layer : layers) {
+        if (strcmp(validLayer, layer.layerName) == 0) {
+          found = true;
+          break;
+        }
+      }
+
+      if (!found) {
+        throw std::runtime_error(std::string("Error: Layer missing:") +
+                                 validLayer);
+      }
+    }
+
+    return validationLayers;
   }
   return {};
 }
 
 std::vector<char const *> getRequiredExtensions() {
+  auto layers = getRequiredLayers();
 
   std::vector<char const *> extensions = {"VK_KHR_surface",
                                           "VK_KHR_android_surface"};
 
+  // Get Extensions from Device.
+  uint32_t extentionCount = 0;
+  vkEnumerateInstanceExtensionProperties(nullptr, &extentionCount, nullptr);
+
+  std::vector<VkExtensionProperties> deviceExtensions(extentionCount);
+  vkEnumerateInstanceExtensionProperties(nullptr, &extentionCount,
+                                         deviceExtensions.data());
+
+  for (const auto &layer : layers) {
+    // Get Extensions from layers.
+    uint32_t layerExtCount = 0;
+    vkEnumerateInstanceExtensionProperties(layer, &layerExtCount, nullptr);
+
+    std::vector<VkExtensionProperties> layerExtensions(layerExtCount);
+    vkEnumerateInstanceExtensionProperties(layer, &layerExtCount,
+                                           layerExtensions.data());
+
+    // Add layerExtensions to deviceExtensions .
+    deviceExtensions.reserve(deviceExtensions.size() + layerExtensions.size());
+
+    deviceExtensions.insert(deviceExtensions.end(), layerExtensions.begin(),
+                            layerExtensions.end());
+  }
+
   if constexpr (isDebug) {
-    extensions.push_back("");
+    extensions.push_back("VK_EXT_debug_utils");
+  }
+
+  // check if device supports extensions .
+  auto isSupported =
+      std::ranges::all_of(extensions, [&deviceExtensions](const auto &ext) {
+        return std::ranges::any_of(deviceExtensions, [ext](const auto &dExt) {
+          return strcmp(dExt.extensionName, ext) == 0;
+        });
+      });
+
+  if (!isSupported) {
+    throw std::runtime_error("Device Extensions not supported!");
   }
 
   return extensions;
@@ -60,42 +105,27 @@ std::vector<char const *> getRequiredExtensions() {
 //====================================================================
 
 void createInstance(VkInstance &instance) {
-  if constexpr (isDebug) {
-    uint32_t extentionCount = 0;
-    vkEnumerateInstanceExtensionProperties(nullptr, &extentionCount, nullptr);
+  std::vector<char const *> requiredLayers = getRequiredLayers();
+  std::vector<char const *> extensions = getRequiredExtensions();
 
-    std::vector<VkExtensionProperties> extensions(extentionCount);
-    vkEnumerateInstanceExtensionProperties(nullptr, &extentionCount,
-                                           extensions.data());
+  constexpr VkApplicationInfo appInfo{.sType =
+                                          VK_STRUCTURE_TYPE_APPLICATION_INFO,
+                                      .pApplicationName = APPLICATION_NAME,
+                                      .applicationVersion = APPLICATION_VERSION,
+                                      .pEngineName = "MadmanEngine",
+                                      .engineVersion = VK_MAKE_VERSION(0, 1, 0),
+                                      .apiVersion = VK_API_VERSION_1_0};
 
-    LOGD("Enxtensions : ");
-    for (const auto &extension : extensions) {
-      LOGD("  Name: %s, Version: %d", extension.extensionName,
-           extension.specVersion);
-    }
-  } else {
-    std::vector<char const *> requiredLayers = getRequiredLayers();
-    std::vector<char const *> extensions = getRequiredExtensions();
+  VkInstanceCreateInfo createInfo{
+      .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
+      .pApplicationInfo = &appInfo,
+      .enabledLayerCount = static_cast<uint32_t>(requiredLayers.size()),
+      .ppEnabledLayerNames = requiredLayers.data(),
+      .enabledExtensionCount = static_cast<uint32_t>(extensions.size()),
+      .ppEnabledExtensionNames = extensions.data()};
 
-    constexpr VkApplicationInfo appInfo{
-        .sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
-        .pApplicationName = APPLICATION_NAME,
-        .applicationVersion = APPLICATION_VERSION,
-        .pEngineName = "MadmanEngine",
-        .engineVersion = VK_MAKE_VERSION(0, 1, 0),
-        .apiVersion = VK_API_VERSION_1_0};
-
-    VkInstanceCreateInfo createInfo{
-        .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
-        .pApplicationInfo = &appInfo,
-        .enabledLayerCount = static_cast<uint32_t>(requiredLayers.size()),
-        .ppEnabledLayerNames = requiredLayers.data(),
-        .enabledExtensionCount = static_cast<uint32_t>(extensions.size()),
-        .ppEnabledExtensionNames = extensions.data()};
-
-    if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {
-      throw std::runtime_error("Failed to create Vulkan Instance");
-    }
+  if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {
+    throw std::runtime_error("Failed to create Vulkan Instance");
   }
   LOGD("Instance created!");
 };
@@ -136,8 +166,8 @@ void VulkanContext::init() {
 
   try {
     createInstance(instance);
-    // if constexpr (isDebug)
-    //   setDebugMessenger();
+    if constexpr (isDebug)
+      setDebugMessenger();
     setPhysicalDevice();
 
   } catch (const std::exception &err) {
@@ -161,26 +191,26 @@ void VulkanContext::render() {
 //====================================================================
 //  Debug Functions
 //====================================================================
-// void Engine::setDebugMessenger() {
-//
-//   vk::DebugUtilsMessageSeverityFlagsEXT severityFlags(
-//       vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning |
-//       vk::DebugUtilsMessageSeverityFlagBitsEXT::eError);
-//
-//   vk::DebugUtilsMessageTypeFlagsEXT messageTypeFlags(
-//       vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral |
-//       vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance |
-//       vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation);
-//
-//   vk::DebugUtilsMessengerCreateInfoEXT debugUtilsMessengerCreateInfoEXT(
-//       {}, severityFlags, messageTypeFlags, &debugCallback);
-//
-//   debugMessenger =
-//       instance.createDebugUtilsMessengerEXT(debugUtilsMessengerCreateInfoEXT);
-//
-//   LOGD("Debug Messenger Initialized!");
-// }
-//
+void VulkanContext::setDebugMessenger() {
+  //
+  //   vk::DebugUtilsMessageSeverityFlagsEXT severityFlags(
+  //       vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning |
+  //       vk::DebugUtilsMessageSeverityFlagBitsEXT::eError);
+  //
+  //   vk::DebugUtilsMessageTypeFlagsEXT messageTypeFlags(
+  //       vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral |
+  //       vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance |
+  //       vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation);
+  //
+  //   vk::DebugUtilsMessengerCreateInfoEXT debugUtilsMessengerCreateInfoEXT(
+  //       {}, severityFlags, messageTypeFlags, &debugCallback);
+  //
+  //   debugMessenger =
+  //       instance.createDebugUtilsMessengerEXT(debugUtilsMessengerCreateInfoEXT);
+  //
+  //   LOGD("Debug Messenger Initialized!");
+}
+
 // VKAPI_ATTR VkBool32 VKAPI_CALL
 // Engine::debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
 //                       VkDebugUtilsMessageTypeFlagsEXT messageType,
