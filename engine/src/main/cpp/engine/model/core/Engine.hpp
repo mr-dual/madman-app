@@ -20,10 +20,12 @@ private:
   void renderLoop();
 
 public:
-  Engine(ANativeWindow *win);
+  Engine();
   ~Engine();
 
+  void setWindow(ANativeWindow *win);
   void start();
-  void stop();
+  void stopPhysics();
+  void stopRender();
   void resize(int h, int w);
 };

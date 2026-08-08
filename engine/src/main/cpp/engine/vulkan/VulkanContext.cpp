@@ -18,7 +18,10 @@ std::vector<char const *> getRequiredLayers() {
 
     // const std::vector<char const *> validationLayers{
     //     "VK_LAYER_KHRONOS_validation"};
-    // auto layerProperties = context.enumerateInstanceLayerProperties();
+    // uint32_t layerCount = 0;
+    // vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
+    //
+    // std::vector<VkExtensionProperties> layerProperties(layerCount);
     //
     // for (const auto &validationLayer : validationLayers) {
     //   bool found = false;

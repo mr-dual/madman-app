@@ -6,10 +6,9 @@
 //====================================================================
 //  Engine State Controls
 //====================================================================
-Engine::Engine(ANativeWindow *win)
-    : window(win), mGraphicsContext(std::make_unique<VulkanContext>()) {}
+Engine::Engine() : mGraphicsContext(std::make_unique<VulkanContext>()) {}
 
-Engine::~Engine() = default;
+Engine::~Engine() { mGraphicsContext->cleanup(); }
 
 void Engine::start() {
   if (isRunning)
@@ -23,7 +22,7 @@ void Engine::start() {
   return;
 }
 
-void Engine::stop() {
+void Engine::stopRender() {
   if (!isRunning)
     return;
 
@@ -48,7 +47,7 @@ void Engine::resize(int h, int w) {
 }
 
 //====================================================================
-//  Engine Render Loop and Cleanup
+//  Engine Render Loop and Set Window
 //====================================================================
 
 void Engine::renderLoop() {
@@ -67,3 +66,5 @@ void Engine::renderLoop() {
 
   LOGD("Render stopped in cpp.");
 }
+
+void Engine::setWindow(ANativeWindow *win) { window = win; }

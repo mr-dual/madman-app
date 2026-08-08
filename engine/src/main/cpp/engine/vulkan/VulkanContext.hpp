@@ -21,7 +21,7 @@ private:
 
 public:
   VulkanContext() = default;
-  ~VulkanContext() override = default;
+  ~VulkanContext() override { cleanup(); };
 
   void init() override;
   void render() override;

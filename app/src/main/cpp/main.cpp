@@ -7,51 +7,59 @@
 #define APP_VERSION_MINOR 1
 #define APP_VERSION_PATCH 0
 
-#include "engine/2d/Engine2d.hpp"
 #include "engine/config/EngineConfig.hpp"
+#include "engine/model/2d/Engine2d.hpp"
 #include "util/Log.hpp"
 
-extern "C" {
 //====================================================================
-// Handle Window Initialization and Inputs
+// Handle Inputs and Commands
 //====================================================================
 
 void handleCmd(struct android_app *app, int32_t cmd) {
+  auto *engine = static_cast<Engine2d *>(app->userData);
+
   switch (cmd) {
   case APP_CMD_INIT_WINDOW:
-    // Native window is ready for rendering
     LOGD("APP_CMD_INIT_WINDOW received");
+    engine->setWindow(app->window);
+    engine->start();
     break;
+
   case APP_CMD_TERM_WINDOW:
-    // Clean up window resources here
+    LOGD("APP_CMD_TERM_WINDOW received");
+    engine->stopRender();
     break;
-  }
-}
 
-inline void initWindow(android_app *&app) {
-  LOGD("Window initialized!");
-  while (app->window == nullptr) {
-    int events;
-    android_poll_source *source;
-
-    if (ALooper_pollOnce(-1, nullptr, &events, (void **)&source) >= 0) {
-      if (source != nullptr) {
-        source->process(app, source);
-      }
+  case APP_CMD_CONFIG_CHANGED:
+    LOGD("APP_CMD_CONFIG_CHANGED received");
+    if (app->window != nullptr) {
+      engine->resize(ANativeWindow_getHeight(app->window),
+                     ANativeWindow_getWidth(app->window));
     }
+    break;
+
+  case APP_CMD_DESTROY:
+    LOGD("APP_CMD_DESTROY received");
+    engine->stopPhysics();
+    engine->stopRender();
+    break;
   }
 }
 
 inline bool handleInput(android_app *&app) {
   int events;
   android_poll_source *source;
+  auto *engine = static_cast<Engine2d *>(app->userData);
 
-  while (ALooper_pollOnce(0, nullptr, &events, (void **)&source) >= 0) {
+  while (ALooper_pollOnce(app->window == nullptr ? -1 : 0, nullptr, &events,
+                          (void **)&source) >= 0) {
     if (source != nullptr) {
       source->process(app, source);
     }
 
     if (app->destroyRequested != 0) {
+      engine->stopPhysics();
+      engine->stopRender();
       return false;
     }
   }
@@ -61,21 +69,16 @@ inline bool handleInput(android_app *&app) {
 //====================================================================
 // Android Main
 //====================================================================
-void android_main(struct android_app *app) {
+extern "C" void android_main(struct android_app *app) {
   LOGD("Madman Engine Started!");
 
+  EngineConfigs engineConfig(240.0);
+  Engine2d gEngine;
+
+  app->userData = &gEngine;
   app->onAppCmd = handleCmd;
-
-  initWindow(app);
-
-  static EngineConfigs engineConfig(240.0);
-  static Engine2d gEngine(app->window);
-  gEngine.start();
 
   while (handleInput(app)) {
     continue;
   }
-
-  gEngine.stop();
-}
 }
