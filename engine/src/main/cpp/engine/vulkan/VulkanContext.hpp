@@ -1,7 +1,6 @@
 #pragma once
 
 #include "engine/context/graphics/GraphicsContext.hpp"
-#include <vector>
 #include <vulkan/vulkan_core.h>
 
 class VulkanContext : public GraphicsContext {

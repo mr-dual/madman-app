@@ -3,12 +3,13 @@
 #include "util/IsDebug.hpp"
 #include "util/Log.hpp"
 #include "utils/VulkanExtMethods.hpp"
-#include "vulkan/vulkan_core.h"
+
 #include <algorithm>
 #include <cstdint>
 #include <cstring>
 #include <stdexcept>
 #include <string>
+#include <vector>
 #include <vulkan/vulkan.h>
 
 //====================================================================
