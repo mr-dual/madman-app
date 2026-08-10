@@ -1,9 +1,9 @@
 #include "VulkanContext.hpp"
-#include "createObject/createObject.hpp"
-#include "debug/setDebugMessenger.hpp"
+#include "VulkanDebug.hpp"
+#include "VulkanExtMethods.hpp"
+#include "createObject/CreateObject.hpp"
 #include "util/IsDebug.hpp"
 #include "util/Log.hpp"
-#include "utils/VulkanExtMethods.hpp"
 
 #include <stdexcept>
 #include <vulkan/vulkan.h>

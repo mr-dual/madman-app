@@ -1,5 +1,5 @@
-#include "setDebugMessenger.hpp"
-#include "../utils/VulkanExtMethods.hpp"
+#include "VulkanDebug.hpp"
+#include "VulkanExtMethods.hpp"
 #include "util/Log.hpp"
 #include <stdexcept>
 

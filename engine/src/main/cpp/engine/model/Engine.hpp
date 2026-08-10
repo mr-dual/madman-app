@@ -1,7 +1,7 @@
 #pragma once
 
-#include "engine/context/engine/EngineContext.hpp"
-#include "engine/context/graphics/GraphicsContext.hpp"
+#include "engine/context/EngineContext.hpp"
+#include "engine/context/GraphicsContext.hpp"
 #include <android/native_window.h>
 #include <atomic>
 #include <thread>

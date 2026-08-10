@@ -1,5 +1,5 @@
 #pragma once
 
-#include "../core/Engine.hpp"
+#include "Engine.hpp"
 
 class Engine3d : public Engine {};

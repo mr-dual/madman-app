@@ -1,6 +1,5 @@
 #include "VulkanExtMethods.hpp"
 #include "util/Log.hpp"
-#include "vulkan/vulkan_core.h"
 
 namespace vkMethods {
 VkResult CreateDebugUtilsMessengerEXT(

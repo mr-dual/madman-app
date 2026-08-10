@@ -1,5 +1,5 @@
-#include "../debug/setDebugMessenger.hpp"
-#include "createObject.hpp"
+#include "../VulkanDebug.hpp"
+#include "CreateObject.hpp"
 #include "util/ApplicationInfo.hpp"
 #include "util/IsDebug.hpp"
 #include "util/Log.hpp"
