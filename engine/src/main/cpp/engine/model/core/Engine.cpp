@@ -1,4 +1,5 @@
 #include "Engine.hpp"
+#include "engine/context/engine/EngineContext.hpp"
 #include "engine/vulkan/VulkanContext.hpp"
 #include "util/Log.hpp"
 #include <vulkan/vulkan.h>
@@ -6,7 +7,8 @@
 //====================================================================
 //  Engine State Controls
 //====================================================================
-Engine::Engine() : mGraphicsContext(std::make_unique<VulkanContext>()) {}
+Engine::Engine(EngineContext &context)
+    : context(context), mGraphicsContext(std::make_unique<VulkanContext>()) {}
 
 Engine::~Engine() { mGraphicsContext->cleanup(); }
 

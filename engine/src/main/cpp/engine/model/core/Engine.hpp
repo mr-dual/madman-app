@@ -1,5 +1,6 @@
 #pragma once
 
+#include "engine/context/engine/EngineContext.hpp"
 #include "engine/context/graphics/GraphicsContext.hpp"
 #include <android/native_window.h>
 #include <atomic>
@@ -16,11 +17,12 @@ private:
   std::atomic<int> width{0};
 
   std::unique_ptr<GraphicsContext> mGraphicsContext;
+  EngineContext &context;
 
   void renderLoop();
 
 public:
-  Engine();
+  Engine(EngineContext &context);
   ~Engine();
 
   void setWindow(ANativeWindow *win);

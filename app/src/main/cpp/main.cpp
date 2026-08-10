@@ -1,3 +1,4 @@
+#include "engine/context/engine/EngineContext.hpp"
 #include <game-activity/GameActivity.h>
 #include <game-activity/native_app_glue/android_native_app_glue.h>
 #include <game-text-input/gametextinput.h>
@@ -7,7 +8,6 @@
 #define APP_VERSION_MINOR 1
 #define APP_VERSION_PATCH 0
 
-#include "engine/config/EngineConfig.hpp"
 #include "engine/model/2d/Engine2d.hpp"
 #include "util/Log.hpp"
 
@@ -72,8 +72,8 @@ inline bool handleInput(android_app *&app) {
 extern "C" void android_main(struct android_app *app) {
   LOGD("Madman Engine Started!");
 
-  EngineConfigs engineConfig(240.0);
-  Engine2d gEngine;
+  EngineContext gEngineContext(240.0);
+  Engine2d gEngine(gEngineContext);
 
   app->userData = &gEngine;
   app->onAppCmd = handleCmd;
