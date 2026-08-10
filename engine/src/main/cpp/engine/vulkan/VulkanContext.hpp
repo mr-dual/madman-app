@@ -9,16 +9,7 @@ private:
   VkDebugUtilsMessengerEXT debugMessenger = VK_NULL_HANDLE;
   VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
 
-  void createInstance();
   // bool isDeviceSupported(const vk::raii::PhysicalDevice &physicalDevice);
-
-  // Debug Mode Stuff
-  void setDebugMessenger();
-  // static VKAPI_ATTR VkBool32 VKAPI_CALL
-  // debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-  //               VkDebugUtilsMessageTypeFlagsEXT messageType,
-  //               const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
-  //               void *pUserData);
 
   VkDebugUtilsMessengerCreateInfoEXT popuateDebugUtilsMessengerCreateInfoEXT();
 

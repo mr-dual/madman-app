@@ -1,4 +1,4 @@
-#include "../VulkanContext.hpp"
+#include "setDebugMessenger.hpp"
 #include "../utils/VulkanExtMethods.hpp"
 #include "util/Log.hpp"
 #include <stdexcept>
@@ -6,7 +6,7 @@
 //====================================================================
 //  Debug Functions
 //====================================================================
-namespace {
+namespace DebugMessenger {
 VKAPI_ATTR VkBool32 VKAPI_CALL
 debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
               VkDebugUtilsMessageTypeFlagsEXT messageType,
@@ -33,21 +33,8 @@ debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
 
   return VK_FALSE;
 }
-} // namespace
 
-void VulkanContext::setDebugMessenger() {
-  auto createInfo = popuateDebugUtilsMessengerCreateInfoEXT();
-
-  if (vkMethods::CreateDebugUtilsMessengerEXT(instance, &createInfo, nullptr,
-                                              &debugMessenger) != VK_SUCCESS) {
-    throw std::runtime_error("Error: Faimed to create debug messenger!");
-  }
-
-  LOGD("Debug Messenger Initialized!");
-}
-
-VkDebugUtilsMessengerCreateInfoEXT
-VulkanContext::popuateDebugUtilsMessengerCreateInfoEXT() {
+VkDebugUtilsMessengerCreateInfoEXT popuateDebugUtilsMessengerCreateInfoEXT() {
 
   return VkDebugUtilsMessengerCreateInfoEXT{
       .sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
@@ -59,3 +46,16 @@ VulkanContext::popuateDebugUtilsMessengerCreateInfoEXT() {
       .pfnUserCallback = debugCallback,
       .pUserData = nullptr};
 }
+
+void setDebugMessenger(VkInstance &instance,
+                       VkDebugUtilsMessengerEXT &debugMessenger) {
+  auto createInfo = popuateDebugUtilsMessengerCreateInfoEXT();
+
+  if (vkMethods::CreateDebugUtilsMessengerEXT(instance, &createInfo, nullptr,
+                                              &debugMessenger) != VK_SUCCESS) {
+    throw std::runtime_error("Error: Faimed to create debug messenger!");
+  }
+
+  LOGD("Debug Messenger Initialized!");
+}
+} // namespace DebugMessenger

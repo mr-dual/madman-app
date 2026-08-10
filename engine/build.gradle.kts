@@ -1,12 +1,10 @@
 plugins {
     id("com.android.library")
-    id("org.jetbrains.kotlin.android")
 }
 
 android {
     namespace = "com.madman.engine"
-    compileSdk = 35
-    buildToolsVersion = "35.0.1"
+    compileSdk = 37
     ndkVersion = "29.0.14206865"
     ndkPath = "/data/data/com.termux/files/home/android-ndk-r29"
 
