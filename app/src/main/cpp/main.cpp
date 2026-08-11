@@ -72,7 +72,7 @@ inline bool handleInput(android_app *&app) {
 extern "C" void android_main(struct android_app *app) {
   LOGD("Madman Engine Started!");
 
-  EngineContext gEngineContext(240.0);
+  EngineContext gEngineContext;
   Engine2d gEngine(gEngineContext);
 
   app->userData = &gEngine;

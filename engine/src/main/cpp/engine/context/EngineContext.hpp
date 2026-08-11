@@ -4,9 +4,9 @@
 
 class EngineContext {
 public:
-  const double physHz = 240.0;
+  double physHz;
   std::chrono::duration<double> fixedDelta;
 
-  EngineContext(const double physHz)
+  explicit EngineContext(const double physHz = 240.0)
       : physHz(physHz), fixedDelta(1.0 / physHz) {}
 };

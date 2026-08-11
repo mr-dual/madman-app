@@ -11,8 +11,4 @@ VkResult CreateDebugUtilsMessengerEXT(
 void DestroyDebugUtilsMessengerEXT(VkInstance instance,
                                    VkDebugUtilsMessengerEXT messenger,
                                    const VkAllocationCallbacks *pAllocator);
-
-void popuateDebugUtilsMessengerCreateInfoEXT(
-    VkDebugUtilsMessengerCreateInfoEXT &rCreateInfo,
-    PFN_vkDebugUtilsMessengerCallbackEXT debugCallback);
 } // namespace vkMethods

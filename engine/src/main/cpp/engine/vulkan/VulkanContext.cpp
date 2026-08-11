@@ -1,19 +1,13 @@
 #include "VulkanContext.hpp"
-#include "VulkanDebug.hpp"
 #include "VulkanExtMethods.hpp"
 #include "createObject/CreateObject.hpp"
 #include "util/IsDebug.hpp"
 #include "util/Log.hpp"
 
-#include <stdexcept>
+#include <exception>
 #include <vulkan/vulkan.h>
-
-namespace {
-void setPhysicalDevice();
-} // namespace
-
 //====================================================================
-// Initialize and Cleanup Vulkan .
+// Initialize Vulkan
 //====================================================================
 
 void VulkanContext::init() {
@@ -24,13 +18,17 @@ void VulkanContext::init() {
   try {
     createInstance(instance);
     if constexpr (isDebug)
-      DebugMessenger::setDebugMessenger(instance, debugMessenger);
-    setPhysicalDevice();
+      debugMessenger = createDebugMessenger(instance);
+    physicalDevice = createPhysicalDevice(instance);
 
   } catch (const std::exception &err) {
     LOGE("Error: %s", err.what());
   }
 }
+
+//====================================================================
+// Cleanup Vulkan
+//====================================================================
 
 void VulkanContext::cleanup() {
   if (debugMessenger != VK_NULL_HANDLE) {
@@ -50,29 +48,3 @@ void VulkanContext::resize(int h, int w) {
 void VulkanContext::render() {
   // TODO:add render stuff.
 }
-
-namespace {
-//====================================================================
-//  Set Physical Device
-//====================================================================
-
-void setPhysicalDevice() {
-  // auto physicalDevices = instance.enumeratePhysicalDevices();
-  //
-  // if (physicalDevices.empty())
-  //   throw std::runtime_error("Failed to find GPUs with vulkan support!");
-  //
-  // for (const auto &physicalDevice : physicalDevices) {
-  //   if (isDeviceSupported(physicalDevice)) {
-  //
-  //   } else {
-  //     continue;
-  //   }
-  // }
-}
-
-// bool Engine::isDeviceSupported(const vk::raii::PhysicalDevice
-// &physicalDevice) {
-//   return false;
-// }
-} // namespace

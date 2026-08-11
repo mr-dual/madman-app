@@ -11,8 +11,6 @@ private:
 
   // bool isDeviceSupported(const vk::raii::PhysicalDevice &physicalDevice);
 
-  VkDebugUtilsMessengerCreateInfoEXT popuateDebugUtilsMessengerCreateInfoEXT();
-
 public:
   VulkanContext() = default;
   ~VulkanContext() override { cleanup(); };

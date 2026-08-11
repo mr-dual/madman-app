@@ -1,4 +1,3 @@
-#include "../VulkanDebug.hpp"
 #include "CreateObject.hpp"
 #include "util/ApplicationInfo.hpp"
 #include "util/IsDebug.hpp"
@@ -45,7 +44,7 @@ void createInstance(VkInstance &instance) {
       .ppEnabledExtensionNames = extensions.data()};
 
   if constexpr (isDebug) {
-    debugCreateInfo = DebugMessenger::popuateDebugUtilsMessengerCreateInfoEXT();
+    debugCreateInfo = populateDebugUtilsMessengerCreateInfoEXT();
     createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT *)&debugCreateInfo;
   }
 
