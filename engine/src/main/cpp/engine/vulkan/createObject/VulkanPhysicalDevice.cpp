@@ -8,13 +8,13 @@
 
 namespace {
 int rateDevice(const VkPhysicalDevice device);
-}
+} // namespace
 
 //====================================================================
 //  Set Physical Device
 //====================================================================
 
-VkPhysicalDevice createPhysicalDevice(VkInstance instance) {
+VkPhysicalDevice pickPhysicalDevice(VkInstance instance) {
   uint32_t deviceCount = 0;
   vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
 
@@ -45,11 +45,14 @@ int rateDevice(const VkPhysicalDevice device) {
   vkGetPhysicalDeviceProperties(device, &deviceProperties);
   vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
 
-  if (deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
-    score += 1000;
+  if (!findQueueFamilies(device).isComplete())
+    return 0;
 
   if (deviceProperties.apiVersion < VK_API_VERSION_1_0)
     return 0;
+
+  if (deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
+    score += 1000;
 
   return score;
 }

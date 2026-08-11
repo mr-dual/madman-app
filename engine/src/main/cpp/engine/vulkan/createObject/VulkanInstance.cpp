@@ -6,16 +6,6 @@
 #include <vector>
 
 //====================================================================
-// Forward declarations.
-//====================================================================
-
-namespace {
-std::vector<char const *> getRequiredLayers();
-std::vector<char const *>
-getRequiredExtensions(std::vector<char const *> &layers);
-} // namespace
-
-//====================================================================
 // Create Instance
 //====================================================================
 
@@ -55,7 +45,6 @@ void createInstance(VkInstance &instance) {
   LOGD("Instance created!");
 };
 
-namespace {
 //====================================================================
 //  Get Layers
 //====================================================================
@@ -147,4 +136,3 @@ getRequiredExtensions(std::vector<char const *> &layers) {
 
   return extensions;
 }
-} // namespace

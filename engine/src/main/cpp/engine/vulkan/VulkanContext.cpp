@@ -3,6 +3,7 @@
 #include "createObject/CreateObject.hpp"
 #include "util/IsDebug.hpp"
 #include "util/Log.hpp"
+#include "vulkan/vulkan_core.h"
 
 #include <exception>
 #include <vulkan/vulkan.h>
@@ -19,7 +20,8 @@ void VulkanContext::init() {
     createInstance(instance);
     if constexpr (isDebug)
       debugMessenger = createDebugMessenger(instance);
-    physicalDevice = createPhysicalDevice(instance);
+    physicalDevice = pickPhysicalDevice(instance);
+    device = createDevice(physicalDevice);
 
   } catch (const std::exception &err) {
     LOGE("Error: %s", err.what());
@@ -31,6 +33,10 @@ void VulkanContext::init() {
 //====================================================================
 
 void VulkanContext::cleanup() {
+  if (device != VK_NULL_HANDLE) {
+    vkDestroyDevice(device, nullptr);
+    device = VK_NULL_HANDLE;
+  }
   if (debugMessenger != VK_NULL_HANDLE) {
     vkMethods::DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);
     debugMessenger = VK_NULL_HANDLE;
