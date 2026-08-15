@@ -15,7 +15,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(VulkanHeaders)
 
 file(GLOB_RECURSE ENGINE_SOURCES CONFIGURE_DEPENDS
-    "engine/*.cpp"
+    "*.cpp"
 )
 add_library(madman_engine STATIC 
     ${ENGINE_SOURCES})

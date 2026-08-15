@@ -21,7 +21,7 @@ void handleCmd(struct android_app *app, int32_t cmd) {
   switch (cmd) {
   case APP_CMD_INIT_WINDOW:
     LOGD("APP_CMD_INIT_WINDOW received");
-    engine->setWindow(app->window);
+    engine->setWindow(NativeWindow(app->window));
     engine->start();
     break;
 
@@ -33,8 +33,9 @@ void handleCmd(struct android_app *app, int32_t cmd) {
   case APP_CMD_CONFIG_CHANGED:
     LOGD("APP_CMD_CONFIG_CHANGED received");
     if (app->window != nullptr) {
-      engine->resize(ANativeWindow_getHeight(app->window),
-                     ANativeWindow_getWidth(app->window));
+      engine->setWindow(NativeWindow(app->window));
+      engine->resize(ANativeWindow_getWidth(app->window),
+                     ANativeWindow_getHeight(app->window));
     }
     break;
 

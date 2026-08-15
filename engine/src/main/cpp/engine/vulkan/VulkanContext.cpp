@@ -1,14 +1,14 @@
 #include "VulkanContext.hpp"
 #include "VulkanExtMethods.hpp"
 #include "createObject/CreateObject.hpp"
+#include "platforms/NativeWindow.hpp"
 #include "util/IsDebug.hpp"
 #include "util/Log.hpp"
 #include "vulkan/vulkan_core.h"
 
 #include <exception>
-#include <vulkan/vulkan.h>
 //====================================================================
-// Initialize Vulkan
+// Initialize Vulkan and setWindow
 //====================================================================
 
 void VulkanContext::init() {
@@ -20,14 +20,16 @@ void VulkanContext::init() {
     createInstance(instance);
     if constexpr (isDebug)
       debugMessenger = createDebugMessenger(instance);
+    surface = createSurface(instance, window);
     physicalDevice = pickPhysicalDevice(instance);
-    device = createDevice(physicalDevice);
+    device = createDevice(physicalDevice, queue);
 
   } catch (const std::exception &err) {
     LOGE("Error: %s", err.what());
   }
 }
 
+void VulkanContext::setWindow(const NativeWindow &win) { window = win; }
 //====================================================================
 // Cleanup Vulkan
 //====================================================================
@@ -36,6 +38,10 @@ void VulkanContext::cleanup() {
   if (device != VK_NULL_HANDLE) {
     vkDestroyDevice(device, nullptr);
     device = VK_NULL_HANDLE;
+  }
+  if (surface != VK_NULL_HANDLE) {
+    vkDestroySurfaceKHR(instance, surface, nullptr);
+    surface = VK_NULL_HANDLE;
   }
   if (debugMessenger != VK_NULL_HANDLE) {
     vkMethods::DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);

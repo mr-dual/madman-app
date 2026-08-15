@@ -2,13 +2,13 @@
 
 #include "engine/context/EngineContext.hpp"
 #include "engine/context/GraphicsContext.hpp"
-#include <android/native_window.h>
+#include "platforms/NativeWindow.hpp"
 #include <atomic>
 #include <thread>
 
 class Engine {
 protected:
-  ANativeWindow *window;
+  NativeWindow window = nullptr;
 
 private:
   std::thread renderThread;
@@ -25,7 +25,7 @@ public:
   Engine(EngineContext &context);
   ~Engine();
 
-  void setWindow(ANativeWindow *win);
+  void setWindow(NativeWindow win);
   void start();
   void stopPhysics();
   void stopRender();

@@ -9,11 +9,10 @@ VkResult CreateDebugUtilsMessengerEXT(
   auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(
       instance, "vkCreateDebugUtilsMessengerEXT");
 
-  if (func != nullptr) {
+  if (func != nullptr)
     return func(instance, pCreateInfo, pAllocator, pMessenger);
-  } else {
-    return VK_ERROR_EXTENSION_NOT_PRESENT;
-  }
+
+  return VK_ERROR_EXTENSION_NOT_PRESENT;
 }
 
 void DestroyDebugUtilsMessengerEXT(VkInstance instance,
@@ -23,9 +22,22 @@ void DestroyDebugUtilsMessengerEXT(VkInstance instance,
       instance, "vkDestroyDebugUtilsMessengerEXT");
 
   if (func != nullptr) {
-    return func(instance, messenger, pAllocator);
+    func(instance, messenger, pAllocator);
   } else {
-    LOGE("Error: Couldn't destroy Debug Messenger");
+    LOGE("Error: Couldn't find Destroy Debug Messenger");
   }
+}
+
+VkResult CreateAndroidSurface(VkInstance instance,
+                              const VkAndroidSurfaceCreateInfoKHR *pCreateInfo,
+                              const VkAllocationCallbacks *pAllocator,
+                              VkSurfaceKHR *pSurface) {
+  auto func = (PFN_vkCreateAndroidSurfaceKHR)vkGetInstanceProcAddr(
+      instance, "vkCreateAndroidSurfaceKHR");
+
+  if (func != nullptr)
+    return func(instance, pCreateInfo, pAllocator, pSurface);
+
+  return VK_ERROR_EXTENSION_NOT_PRESENT;
 }
 } // namespace vkMethods

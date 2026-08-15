@@ -17,7 +17,7 @@ VkDevice createDevice(VkPhysicalDevice physicalDevice, VkQueue &queue) {
   float queuePriority = 1.0f;
   VkDeviceQueueCreateInfo queueCreateInfo{
       .sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
-      .queueFamilyIndex = indices.grpahicsFamily.value(),
+      .queueFamilyIndex = indices.graphicsFamily.value(),
       .queueCount = 1,
       .pQueuePriorities = &queuePriority};
 
@@ -38,7 +38,7 @@ VkDevice createDevice(VkPhysicalDevice physicalDevice, VkQueue &queue) {
       VK_SUCCESS)
     throw std::runtime_error("Failed to create logical device!");
 
-  vkGetDeviceQueue(device, indices.grpahicsFamily.value(), 0, &queue);
+  vkGetDeviceQueue(device, indices.graphicsFamily.value(), 0, &queue);
 
   LOGD("Created logical device!");
   return device;
@@ -56,7 +56,7 @@ QueueFamilyIndices findQueueFamilies(const VkPhysicalDevice device) {
 
   for (uint32_t i = 0; queueFamilies.size() > i; i++) {
     if (queueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) {
-      indices.grpahicsFamily = i;
+      indices.graphicsFamily = i;
       break;
     }
   }

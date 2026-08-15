@@ -1,6 +1,7 @@
 #include "Engine.hpp"
 #include "engine/context/EngineContext.hpp"
 #include "engine/vulkan/VulkanContext.hpp"
+#include "platforms/NativeWindow.hpp"
 #include "util/Log.hpp"
 #include <vulkan/vulkan.h>
 
@@ -38,11 +39,11 @@ void Engine::stopRender() {
   return;
 }
 
-void Engine::resize(int h, int w) {
+void Engine::resize(int w, int h) {
   height = h;
   width = w;
 
-  mGraphicsContext->resize(h, w);
+  mGraphicsContext->resize(w, h);
   LOGD("resized from cpp with dimentions %dx%d", height.load(), width.load());
 
   return;
@@ -56,12 +57,7 @@ void Engine::renderLoop() {
   LOGD("Render started in cpp.");
 
   while (isRunning) {
-    if (window != nullptr) {
-      mGraphicsContext->render();
-    } else {
-      LOGE("window is null");
-      break;
-    }
+    mGraphicsContext->render();
 
     std::this_thread::sleep_for(std::chrono::milliseconds(16));
   }
@@ -69,4 +65,7 @@ void Engine::renderLoop() {
   LOGD("Render stopped in cpp.");
 }
 
-void Engine::setWindow(ANativeWindow *win) { window = win; }
+void Engine::setWindow(NativeWindow win) {
+  window = win;
+  mGraphicsContext->setWindow(win);
+}
