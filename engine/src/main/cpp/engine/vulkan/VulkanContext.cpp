@@ -22,7 +22,8 @@ void VulkanContext::init() {
       debugMessenger = createDebugMessenger(instance);
     surface = createSurface(instance, window);
     physicalDevice = pickPhysicalDevice(instance);
-    device = createDevice(physicalDevice, queue);
+    queueIndices = findQueueFamilies(physicalDevice);
+    device = createDevice(physicalDevice, queues);
 
   } catch (const std::exception &err) {
     LOGE("Error: %s", err.what());

@@ -7,14 +7,15 @@
 #include <vector>
 
 namespace {
-int rateDevice(const VkPhysicalDevice device);
+int rateDevice(const VkPhysicalDevice device, QueueFamilyIndices &indices);
 } // namespace
 
 //====================================================================
 //  Set Physical Device
 //====================================================================
 
-VkPhysicalDevice pickPhysicalDevice(VkInstance instance) {
+VkPhysicalDevice pickPhysicalDevice(VkInstance instance,
+                                    QueueFamilyIndices &indices) {
   uint32_t deviceCount = 0;
   vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
 
@@ -26,7 +27,7 @@ VkPhysicalDevice pickPhysicalDevice(VkInstance instance) {
 
   std::multimap<int, VkPhysicalDevice> candidates;
   for (const auto &device : devices) {
-    int score = rateDevice(device);
+    int score = rateDevice(device, indices);
     candidates.insert(std::make_pair(score, device));
   }
 
@@ -38,15 +39,18 @@ VkPhysicalDevice pickPhysicalDevice(VkInstance instance) {
 }
 
 namespace {
-int rateDevice(const VkPhysicalDevice device) {
+int rateDevice(const VkPhysicalDevice device, QueueFamilyIndices &indices) {
   int score = 0;
   VkPhysicalDeviceFeatures deviceFeatures;
   VkPhysicalDeviceProperties deviceProperties;
   vkGetPhysicalDeviceProperties(device, &deviceProperties);
   vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
 
-  if (!findQueueFamilies(device).isComplete())
+  if (!indices.isComplete()) {
     return 0;
+  } else {
+    score += 100;
+  }
 
   if (deviceProperties.apiVersion < VK_API_VERSION_1_0)
     return 0;
