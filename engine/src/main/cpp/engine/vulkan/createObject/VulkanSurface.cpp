@@ -1,9 +1,8 @@
 #include "../VulkanExtMethods.hpp"
-#include "CreateObject.hpp"
+#include "engine/vulkan/VulkanContext.hpp"
+#include "util/Log.hpp"
 
-VkSurfaceKHR createSurface(VkInstance instance, NativeWindow window) {
-  VkSurfaceKHR surface;
-
+void VulkanContext::createSurface() {
   VkAndroidSurfaceCreateInfoKHR createInfo{
       .sType = VK_STRUCTURE_TYPE_ANDROID_SURFACE_CREATE_INFO_KHR,
       .window = static_cast<ANativeWindow *>(window.window)};
@@ -12,5 +11,5 @@ VkSurfaceKHR createSurface(VkInstance instance, NativeWindow window) {
                                       &surface) != VK_SUCCESS)
     throw std::runtime_error("Failed to create surface!");
 
-  return surface;
+  LOGD("Surface created!");
 }

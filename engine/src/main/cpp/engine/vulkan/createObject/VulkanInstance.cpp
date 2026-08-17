@@ -1,4 +1,4 @@
-#include "CreateObject.hpp"
+#include "engine/vulkan/VulkanContext.hpp"
 #include "platforms/GetExtensions.hpp"
 #include "util/ApplicationInfo.hpp"
 #include "util/IsDebug.hpp"
@@ -9,7 +9,7 @@
 #include <ranges>
 #include <span>
 #include <string_view>
-#include <vector>
+
 namespace {
 
 void verifyExtsAndLayers(std::span<const char *const> exts,
@@ -19,7 +19,7 @@ void verifyExtsAndLayers(std::span<const char *const> exts,
 // Create Instance
 //====================================================================
 
-void createInstance(VkInstance &instance) {
+void VulkanContext::createInstance() {
   // Get and verify Layers And Extensions
 
   std::vector<char const *> validationLayers = getRequiredLayers();
@@ -117,7 +117,8 @@ void verifyExtsAndLayers(std::span<const char *const> exts,
   }
 }
 } // namespace
-std::vector<char const *> getRequiredLayers() {
+  //
+std::vector<char const *> VulkanContext::getRequiredLayers() {
   if constexpr (isDebug)
     return {"VK_LAYER_KHRONOS_validation"};
 

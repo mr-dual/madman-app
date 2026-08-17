@@ -1,10 +1,7 @@
 #include "VulkanContext.hpp"
 #include "VulkanExtMethods.hpp"
-#include "createObject/CreateObject.hpp"
-#include "platforms/NativeWindow.hpp"
 #include "util/IsDebug.hpp"
 #include "util/Log.hpp"
-#include "vulkan/vulkan_core.h"
 
 #include <exception>
 //====================================================================
@@ -17,13 +14,12 @@ void VulkanContext::init() {
   }
 
   try {
-    createInstance(instance);
+    createInstance();
     if constexpr (isDebug)
-      debugMessenger = createDebugMessenger(instance);
-    surface = createSurface(instance, window);
-    physicalDevice = pickPhysicalDevice(instance);
-    queueIndices = findQueueFamilies(physicalDevice);
-    device = createDevice(physicalDevice, queues);
+      createDebugMessenger();
+    createSurface();
+    pickPhysicalDevice();
+    createDevice();
 
   } catch (const std::exception &err) {
     LOGE("Error: %s", err.what());

@@ -1,12 +1,14 @@
-#include "CreateObject.hpp"
-
+#include "engine/vulkan/VulkanContext.hpp"
+#include "util/Log.hpp"
+#include "vulkan/vulkan_core.h"
 #include <cstdint>
 #include <map>
 #include <stdexcept>
 #include <utility>
-#include <vector>
 
 namespace {
+QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device,
+                                     VkSurfaceKHR surface);
 int rateDevice(const VkPhysicalDevice device, QueueFamilyIndices &indices);
 } // namespace
 
@@ -14,8 +16,8 @@ int rateDevice(const VkPhysicalDevice device, QueueFamilyIndices &indices);
 //  Set Physical Device
 //====================================================================
 
-VkPhysicalDevice pickPhysicalDevice(VkInstance instance,
-                                    QueueFamilyIndices &indices) {
+void VulkanContext::pickPhysicalDevice() {
+
   uint32_t deviceCount = 0;
   vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
 
@@ -25,14 +27,20 @@ VkPhysicalDevice pickPhysicalDevice(VkInstance instance,
   std::vector<VkPhysicalDevice> devices(deviceCount);
   vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
 
-  std::multimap<int, VkPhysicalDevice> candidates;
-  for (const auto &device : devices) {
-    int score = rateDevice(device, indices);
-    candidates.insert(std::make_pair(score, device));
+  std::multimap<int, std::pair<VkPhysicalDevice, QueueFamilyIndices>>
+      candidates;
+  for (const auto &physDevice : devices) {
+    auto indices = findQueueFamilies(physDevice, surface);
+
+    candidates.insert(std::make_pair(rateDevice(physDevice, indices),
+                                     std::make_pair(physDevice, indices)));
   }
 
   if (candidates.rbegin()->first > 0) {
-    return candidates.rbegin()->second;
+    physicalDevice = candidates.rbegin()->second.first;
+    queueIndices = candidates.rbegin()->second.second;
+
+    LOGD("Physical Device Selected!");
   } else {
     throw std::runtime_error("Failed to find a suitable GPU!");
   }
@@ -59,5 +67,35 @@ int rateDevice(const VkPhysicalDevice device, QueueFamilyIndices &indices) {
     score += 1000;
 
   return score;
+}
+
+QueueFamilyIndices findQueueFamilies(VkPhysicalDevice physicalDevice,
+                                     VkSurfaceKHR surface) {
+  auto indices = QueueFamilyIndices{};
+
+  uint32_t queueFamilyCount = 0;
+  vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount,
+                                           nullptr);
+  std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
+  vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount,
+                                           queueFamilies.data());
+
+  LOGD("this device has %d queue families.",
+       static_cast<int>(queueFamilies.size()));
+
+  for (uint32_t i = 0; queueFamilies.size() > i; i++) {
+    VkBool32 presentSupport = false;
+    vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, i, surface,
+                                         &presentSupport);
+    if (queueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+      indices.graphicsFamily = i;
+    }
+    if (presentSupport)
+      indices.presentFamily = i;
+    if (indices.isComplete())
+      break;
+  }
+
+  return indices;
 }
 } // namespace
