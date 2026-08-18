@@ -55,7 +55,7 @@ tasks.withType<KotlinCompile>().configureEach {
     
 dependencies {
     implementation("androidx.games:games-activity:4.4.2")
-    implementation("androidx.appcompat:appcompat:1.7.1")
+    implementation("androidx.appcompat:appcompat:1.8.0")
     implementation("androidx.core:core-ktx:1.19.0")
     implementation(project(":engine"))
 }
