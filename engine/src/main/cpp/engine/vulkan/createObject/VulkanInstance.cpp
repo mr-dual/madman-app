@@ -14,7 +14,8 @@ namespace {
 
 void verifyExtsAndLayers(std::span<const char *const> exts,
                          std::span<const char *const> layers);
-}
+std::vector<char const *> getRequiredLayers();
+} // namespace
 //====================================================================
 // Create Instance
 //====================================================================
@@ -116,11 +117,10 @@ void verifyExtsAndLayers(std::span<const char *const> exts,
     throw std::runtime_error("Device Extensions not supported!");
   }
 }
-} // namespace
-  //
-std::vector<char const *> VulkanContext::getRequiredLayers() {
+std::vector<char const *> getRequiredLayers() {
   if constexpr (isDebug)
     return {"VK_LAYER_KHRONOS_validation"};
 
   return {};
 }
+} // namespace

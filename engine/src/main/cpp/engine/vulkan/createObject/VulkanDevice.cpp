@@ -1,5 +1,7 @@
 #include "engine/vulkan/VulkanContext.hpp"
+#include "platforms/GetExtensions.hpp"
 #include "util/Log.hpp"
+#include "vulkan/vulkan_core.h"
 #include <cstdint>
 #include <set>
 #include <stdexcept>
@@ -24,12 +26,14 @@ void VulkanContext::createDevice() {
 
   VkPhysicalDeviceFeatures deviceFeatures{};
 
+  std::vector<char const *> deviceExtensions = getDeviceExtensions();
+
   VkDeviceCreateInfo deviceCreateInfo{
       .sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
       .queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size()),
       .pQueueCreateInfos = queueCreateInfos.data(),
-      .enabledLayerCount = 0,
-      .enabledExtensionCount = 0,
+      .enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size()),
+      .ppEnabledExtensionNames = deviceExtensions.data(),
       .pEnabledFeatures = &deviceFeatures};
 
   if (vkCreateDevice(physicalDevice, &deviceCreateInfo, nullptr, &device) !=
