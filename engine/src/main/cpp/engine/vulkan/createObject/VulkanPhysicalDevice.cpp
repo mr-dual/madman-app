@@ -1,4 +1,5 @@
 #include "engine/vulkan/VulkanContext.hpp"
+#include "platforms/GetExtensions.hpp"
 #include "util/Log.hpp"
 #include "vulkan/vulkan_core.h"
 #include <cstdint>
@@ -6,14 +7,24 @@
 #include <stdexcept>
 #include <utility>
 
+//====================================================================
+// Forward Declarations.
+//====================================================================
+
 namespace {
+bool isDeviceExtensionsSupported(VkPhysicalDevice device);
+
+SwapChainSupportDetails fetchSwapChainSupportDetails(VkPhysicalDevice device,
+                                                     VkSurfaceKHR surface);
+
 QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device,
                                      VkSurfaceKHR surface);
-int rateDevice(const VkPhysicalDevice device, QueueFamilyIndices &indices);
+int rateDevice(const VkPhysicalDevice device, QueueFamilyIndices &indices,
+               VkSurfaceKHR surface, SwapChainSupportDetails &swapchainDetails);
 } // namespace
 
 //====================================================================
-//  Set Physical Device
+//  Pick Physical Device.
 //====================================================================
 
 void VulkanContext::pickPhysicalDevice() {
@@ -27,18 +38,25 @@ void VulkanContext::pickPhysicalDevice() {
   std::vector<VkPhysicalDevice> devices(deviceCount);
   vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
 
-  std::multimap<int, std::pair<VkPhysicalDevice, QueueFamilyIndices>>
+  std::multimap<int, std::tuple<VkPhysicalDevice, QueueFamilyIndices,
+                                SwapChainSupportDetails>>
       candidates;
   for (const auto &physDevice : devices) {
     auto indices = findQueueFamilies(physDevice, surface);
+    auto swapchainDetail = fetchSwapChainSupportDetails(physDevice, surface);
 
-    candidates.insert(std::make_pair(rateDevice(physDevice, indices),
-                                     std::make_pair(physDevice, indices)));
+    candidates.insert(std::make_pair(
+        rateDevice(physDevice, indices, surface, swapchainDetail),
+        std::tuple(physDevice, indices, swapchainDetail)));
   }
 
   if (candidates.rbegin()->first > 0) {
-    physicalDevice = candidates.rbegin()->second.first;
-    queueIndices = candidates.rbegin()->second.second;
+    auto [_physicalDevice, _queueIndices, _swapchainDetails] =
+        candidates.rbegin()->second;
+
+    physicalDevice = _physicalDevice;
+    queueIndices = _queueIndices;
+    swapChainDetails = _swapchainDetails;
 
     LOGD("Physical Device Selected!");
   } else {
@@ -47,17 +65,30 @@ void VulkanContext::pickPhysicalDevice() {
 }
 
 namespace {
-int rateDevice(const VkPhysicalDevice device, QueueFamilyIndices &indices) {
+
+//====================================================================
+// Rate Device
+//====================================================================
+
+int rateDevice(const VkPhysicalDevice device, QueueFamilyIndices &indices,
+               VkSurfaceKHR surface,
+               SwapChainSupportDetails &swapchainDetails) {
   int score = 0;
+
+  // Fetch features and properties.
   VkPhysicalDeviceFeatures deviceFeatures;
   VkPhysicalDeviceProperties deviceProperties;
   vkGetPhysicalDeviceProperties(device, &deviceProperties);
   vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
 
-  if (!indices.isComplete()) {
-    return 0;
-  } else {
+  auto swapChainAdequate = !swapchainDetails.presentModes.empty() &&
+                           !swapchainDetails.formats.empty();
+
+  if (isDeviceExtensionsSupported(device) && indices.isComplete() &&
+      swapChainAdequate) {
     score += 100;
+  } else {
+    return 0;
   }
 
   if (deviceProperties.apiVersion < VK_API_VERSION_1_0)
@@ -68,6 +99,69 @@ int rateDevice(const VkPhysicalDevice device, QueueFamilyIndices &indices) {
 
   return score;
 }
+
+//====================================================================
+// Fetch Swapchain Support Details
+//====================================================================
+
+SwapChainSupportDetails fetchSwapChainSupportDetails(VkPhysicalDevice device,
+                                                     VkSurfaceKHR surface) {
+  SwapChainSupportDetails details;
+
+  vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface,
+                                            &details.capabilities);
+
+  uint32_t formatCount;
+  vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, nullptr);
+
+  if (formatCount != 0) {
+    details.formats.resize(formatCount);
+    vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount,
+                                         details.formats.data());
+  }
+
+  uint32_t presentModeCount;
+  vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount,
+                                            nullptr);
+
+  if (presentModeCount != 0) {
+    details.presentModes.resize(presentModeCount);
+    vkGetPhysicalDeviceSurfacePresentModesKHR(
+        device, surface, &presentModeCount, details.presentModes.data());
+  }
+
+  return details;
+}
+
+//====================================================================
+// Is Device Extensions Supported.
+//====================================================================
+
+bool isDeviceExtensionsSupported(VkPhysicalDevice device) {
+  // Get Device Extensions
+  std::vector<char const *> extensions = getDeviceExtensions();
+
+  // Get Device Extensions from Device
+  uint32_t extCount = 0;
+  vkEnumerateDeviceExtensionProperties(device, nullptr, &extCount, nullptr);
+  std::vector<VkExtensionProperties> devExts(extCount);
+  vkEnumerateDeviceExtensionProperties(device, nullptr, &extCount,
+                                       devExts.data());
+
+  // check if device supports extensions
+  auto isSupported =
+      std::ranges::all_of(extensions, [&devExts](std::string_view ext) {
+        return std::ranges::any_of(
+            devExts, [ext](std::string_view dExt) { return ext == dExt; },
+            &VkExtensionProperties::extensionName);
+      });
+
+  return isSupported;
+}
+
+//====================================================================
+// Find Queue Families.
+//====================================================================
 
 QueueFamilyIndices findQueueFamilies(VkPhysicalDevice physicalDevice,
                                      VkSurfaceKHR surface) {

@@ -14,6 +14,12 @@ struct QueueFamilyIndices {
   }
 };
 
+struct SwapChainSupportDetails {
+  VkSurfaceCapabilitiesKHR capabilities;
+  std::vector<VkSurfaceFormatKHR> formats;
+  std::vector<VkPresentModeKHR> presentModes;
+};
+
 class VulkanContext : public GraphicsContext {
 private:
   VkInstance instance = VK_NULL_HANDLE;
@@ -26,6 +32,8 @@ private:
   VkQueue presentQueue = VK_NULL_HANDLE;
   QueueFamilyIndices queueIndices;
 
+  SwapChainSupportDetails swapChainDetails;
+
   NativeWindow window = nullptr;
 
   void createInstance();
@@ -36,8 +44,6 @@ private:
   // Debug Messenger
   VkDebugUtilsMessengerCreateInfoEXT populateDebugUtilsMessengerCreateInfoEXT();
   void createDebugMessenger();
-
-  std::vector<char const *> getRequiredLayers();
 
 public:
   VulkanContext() = default;

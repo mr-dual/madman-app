@@ -20,6 +20,7 @@ void VulkanContext::init() {
     createSurface();
     pickPhysicalDevice();
     createDevice();
+    createSwapchain();
 
   } catch (const std::exception &err) {
     LOGE("Error: %s", err.what());
