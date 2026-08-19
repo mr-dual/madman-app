@@ -181,10 +181,11 @@ QueueFamilyIndices findQueueFamilies(VkPhysicalDevice physicalDevice,
     VkBool32 presentSupport = false;
     vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, i, surface,
                                          &presentSupport);
-    if (queueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+    if (!indices.graphicsFamily.has_value() &&
+        (queueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)) {
       indices.graphicsFamily = i;
     }
-    if (presentSupport)
+    if (!indices.presentFamily.has_value() && presentSupport)
       indices.presentFamily = i;
     if (indices.isComplete())
       break;

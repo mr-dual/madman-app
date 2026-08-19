@@ -2,6 +2,7 @@
 
 #include "engine/context/GraphicsContext.hpp"
 #include "platforms/NativeWindow.hpp"
+#include "vulkan/vulkan_core.h"
 #include <optional>
 #include <vector>
 #include <vulkan/vulkan.h>
@@ -22,11 +23,15 @@ struct SwapChainSupportDetails {
 
 class VulkanContext : public GraphicsContext {
 private:
+  uint32_t height;
+  uint32_t width;
+
   VkInstance instance = VK_NULL_HANDLE;
   VkDebugUtilsMessengerEXT debugMessenger = VK_NULL_HANDLE;
   VkSurfaceKHR surface = VK_NULL_HANDLE;
   VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
   VkDevice device = VK_NULL_HANDLE;
+  VkSwapchainKHR swapchain = VK_NULL_HANDLE;
 
   VkQueue graphicsQueue = VK_NULL_HANDLE;
   VkQueue presentQueue = VK_NULL_HANDLE;
@@ -40,6 +45,7 @@ private:
   void pickPhysicalDevice();
   void createDevice();
   void createSurface();
+  void createSwapchain();
 
   // Debug Messenger
   VkDebugUtilsMessengerCreateInfoEXT populateDebugUtilsMessengerCreateInfoEXT();
