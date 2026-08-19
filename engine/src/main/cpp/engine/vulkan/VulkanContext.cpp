@@ -2,6 +2,7 @@
 #include "VulkanExtMethods.hpp"
 #include "util/IsDebug.hpp"
 #include "util/Log.hpp"
+#include "vulkan/vulkan_core.h"
 
 #include <exception>
 //====================================================================
@@ -33,6 +34,10 @@ void VulkanContext::setWindow(const NativeWindow &win) { window = win; }
 //====================================================================
 
 void VulkanContext::cleanup() {
+  if (swapchain != VK_NULL_HANDLE) {
+    vkDestroySwapchainKHR(device, swapchain, nullptr);
+    swapchain = VK_NULL_HANDLE;
+  }
   if (device != VK_NULL_HANDLE) {
     vkDestroyDevice(device, nullptr);
     device = VK_NULL_HANDLE;
