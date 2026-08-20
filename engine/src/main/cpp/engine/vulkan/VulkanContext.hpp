@@ -28,13 +28,19 @@ private:
   VkSurfaceKHR _surface = VK_NULL_HANDLE;
   VkPhysicalDevice _physicalDevice = VK_NULL_HANDLE;
   VkDevice _device = VK_NULL_HANDLE;
-  VkSwapchainKHR _swapchain = VK_NULL_HANDLE;
 
+  // Queues
   VkQueue _graphicsQueue = VK_NULL_HANDLE;
   VkQueue _presentQueue = VK_NULL_HANDLE;
   QueueFamilyIndices _queueIndices;
 
+  // Swapchain.
+  VkSwapchainKHR _swapchain = VK_NULL_HANDLE;
   SwapChainSupportDetails _swapChainDetails;
+  std::vector<VkImage> _swapChainImages;
+  VkFormat _imageFormat;
+  VkExtent2D _extent;
+  std::vector<VkImageView> _imageViews;
 
   NativeWindow _window = nullptr;
 
@@ -43,6 +49,7 @@ private:
   void createDevice();
   void createSurface();
   void createSwapchain();
+  void createImageViews();
 
   // Debug Messenger
   VkDebugUtilsMessengerCreateInfoEXT populateDebugUtilsMessengerCreateInfoEXT();

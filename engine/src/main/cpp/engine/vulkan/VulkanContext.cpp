@@ -34,6 +34,9 @@ void VulkanContext::setWindow(const NativeWindow &win) { _window = win; }
 //====================================================================
 
 void VulkanContext::cleanup() {
+  for (const auto &view : _imageViews) {
+    vkDestroyImageView(_device, view, nullptr);
+  }
   if (_swapchain != VK_NULL_HANDLE) {
     vkDestroySwapchainKHR(_device, _swapchain, nullptr);
     _swapchain = VK_NULL_HANDLE;
