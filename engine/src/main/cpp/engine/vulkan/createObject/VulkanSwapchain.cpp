@@ -20,7 +20,7 @@ VkExtent2D pickSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities,
 void VulkanContext::createSwapchain() {
   auto surfaceFormat = pickSurfaceFormat(_swapChainDetails.formats);
   auto presentMode = pickPresentMode(_swapChainDetails.presentModes);
-  auto extent = pickSwapExtent(_swapChainDetails.capabilities, _window);
+  _extent = pickSwapExtent(_swapChainDetails.capabilities, _window);
 
   uint32_t imageCount = _swapChainDetails.capabilities.minImageCount + 1;
 
@@ -41,7 +41,7 @@ void VulkanContext::createSwapchain() {
       .minImageCount = imageCount,
       .imageFormat = surfaceFormat.format,
       .imageColorSpace = surfaceFormat.colorSpace,
-      .imageExtent = extent,
+      .imageExtent = _extent,
       .imageArrayLayers = 1,
       .imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
       .imageSharingMode = uniqueQueueFamilies.size() > 1
@@ -62,6 +62,13 @@ void VulkanContext::createSwapchain() {
   if (vkCreateSwapchainKHR(_device, &createInfo, nullptr, &_swapchain) !=
       VK_SUCCESS)
     throw std::runtime_error("Failed to create swapchain!");
+
+  vkGetSwapchainImagesKHR(_device, _swapchain, &imageCount, nullptr);
+  _swapChainImages.resize(imageCount);
+  vkGetSwapchainImagesKHR(_device, _swapchain, &imageCount,
+                          _swapChainImages.data());
+
+  _imageFormat = surfaceFormat.format;
 
   LOGD("Created Swapchain!");
 }
