@@ -30,33 +30,33 @@ int rateDevice(const VkPhysicalDevice device, QueueFamilyIndices &indices,
 void VulkanContext::pickPhysicalDevice() {
 
   uint32_t deviceCount = 0;
-  vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
+  vkEnumeratePhysicalDevices(_instance, &deviceCount, nullptr);
 
   if (deviceCount == 0)
     throw std::runtime_error("Failed to find GPUs with vulkan support!");
 
   std::vector<VkPhysicalDevice> devices(deviceCount);
-  vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
+  vkEnumeratePhysicalDevices(_instance, &deviceCount, devices.data());
 
   std::multimap<int, std::tuple<VkPhysicalDevice, QueueFamilyIndices,
                                 SwapChainSupportDetails>>
       candidates;
   for (const auto &physDevice : devices) {
-    auto indices = findQueueFamilies(physDevice, surface);
-    auto swapchainDetail = fetchSwapChainSupportDetails(physDevice, surface);
+    auto indices = findQueueFamilies(physDevice, _surface);
+    auto swapchainDetail = fetchSwapChainSupportDetails(physDevice, _surface);
 
     candidates.insert(std::make_pair(
-        rateDevice(physDevice, indices, surface, swapchainDetail),
+        rateDevice(physDevice, indices, _surface, swapchainDetail),
         std::tuple(physDevice, indices, swapchainDetail)));
   }
 
   if (candidates.rbegin()->first > 0) {
-    auto [_physicalDevice, _queueIndices, _swapchainDetails] =
+    auto [physicalDevice, queueIndices, swapchainDetails] =
         candidates.rbegin()->second;
 
-    physicalDevice = _physicalDevice;
-    queueIndices = _queueIndices;
-    swapChainDetails = _swapchainDetails;
+    _physicalDevice = physicalDevice;
+    _queueIndices = queueIndices;
+    _swapChainDetails = swapchainDetails;
 
     LOGD("Physical Device Selected!");
   } else {

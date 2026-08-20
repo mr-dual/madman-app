@@ -18,25 +18,26 @@ VkExtent2D pickSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities,
 } // namespace
 
 void VulkanContext::createSwapchain() {
-  auto surfaceFormat = pickSurfaceFormat(swapChainDetails.formats);
-  auto presentMode = pickPresentMode(swapChainDetails.presentModes);
-  auto extent = pickSwapExtent(swapChainDetails.capabilities, window);
+  auto surfaceFormat = pickSurfaceFormat(_swapChainDetails.formats);
+  auto presentMode = pickPresentMode(_swapChainDetails.presentModes);
+  auto extent = pickSwapExtent(_swapChainDetails.capabilities, _window);
 
-  uint32_t imageCount = swapChainDetails.capabilities.minImageCount + 1;
+  uint32_t imageCount = _swapChainDetails.capabilities.minImageCount + 1;
 
-  if (swapChainDetails.capabilities.maxImageCount > 0 &&
-      imageCount > swapChainDetails.capabilities.maxImageCount)
-    imageCount = swapChainDetails.capabilities.maxImageCount;
+  if (_swapChainDetails.capabilities.maxImageCount > 0 &&
+      imageCount > _swapChainDetails.capabilities.maxImageCount)
+    imageCount = _swapChainDetails.capabilities.maxImageCount;
 
-  std::set<uint32_t> uniqueQueueFamilies = {queueIndices.graphicsFamily.value(),
-                                            queueIndices.presentFamily.value()};
+  std::set<uint32_t> uniqueQueueFamilies = {
+      _queueIndices.graphicsFamily.value(),
+      _queueIndices.presentFamily.value()};
 
   std::vector<uint32_t> queueFamilyIndices(uniqueQueueFamilies.begin(),
                                            uniqueQueueFamilies.end());
 
   VkSwapchainCreateInfoKHR createInfo{
       .sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
-      .surface = surface,
+      .surface = _surface,
       .minImageCount = imageCount,
       .imageFormat = surfaceFormat.format,
       .imageColorSpace = surfaceFormat.colorSpace,
@@ -52,13 +53,13 @@ void VulkanContext::createSwapchain() {
               : 0,
       .pQueueFamilyIndices =
           uniqueQueueFamilies.size() > 1 ? queueFamilyIndices.data() : nullptr,
-      .preTransform = swapChainDetails.capabilities.currentTransform,
+      .preTransform = _swapChainDetails.capabilities.currentTransform,
       .compositeAlpha = VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR,
       .presentMode = presentMode,
       .clipped = VK_TRUE,
       .oldSwapchain = VK_NULL_HANDLE};
 
-  if (vkCreateSwapchainKHR(device, &createInfo, nullptr, &swapchain) !=
+  if (vkCreateSwapchainKHR(_device, &createInfo, nullptr, &_swapchain) !=
       VK_SUCCESS)
     throw std::runtime_error("Failed to create swapchain!");
 

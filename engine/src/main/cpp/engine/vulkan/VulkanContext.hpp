@@ -23,23 +23,20 @@ struct SwapChainSupportDetails {
 
 class VulkanContext : public GraphicsContext {
 private:
-  uint32_t height;
-  uint32_t width;
+  VkInstance _instance = VK_NULL_HANDLE;
+  VkDebugUtilsMessengerEXT _debugMessenger = VK_NULL_HANDLE;
+  VkSurfaceKHR _surface = VK_NULL_HANDLE;
+  VkPhysicalDevice _physicalDevice = VK_NULL_HANDLE;
+  VkDevice _device = VK_NULL_HANDLE;
+  VkSwapchainKHR _swapchain = VK_NULL_HANDLE;
 
-  VkInstance instance = VK_NULL_HANDLE;
-  VkDebugUtilsMessengerEXT debugMessenger = VK_NULL_HANDLE;
-  VkSurfaceKHR surface = VK_NULL_HANDLE;
-  VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
-  VkDevice device = VK_NULL_HANDLE;
-  VkSwapchainKHR swapchain = VK_NULL_HANDLE;
+  VkQueue _graphicsQueue = VK_NULL_HANDLE;
+  VkQueue _presentQueue = VK_NULL_HANDLE;
+  QueueFamilyIndices _queueIndices;
 
-  VkQueue graphicsQueue = VK_NULL_HANDLE;
-  VkQueue presentQueue = VK_NULL_HANDLE;
-  QueueFamilyIndices queueIndices;
+  SwapChainSupportDetails _swapChainDetails;
 
-  SwapChainSupportDetails swapChainDetails;
-
-  NativeWindow window = nullptr;
+  NativeWindow _window = nullptr;
 
   void createInstance();
   void pickPhysicalDevice();
