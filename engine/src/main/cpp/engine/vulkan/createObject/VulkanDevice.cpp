@@ -8,12 +8,12 @@
 
 void VulkanContext::createDevice() {
 
-  if (!queueIndices.isComplete())
+  if (!_queueIndices.isComplete())
     throw std::range_error("No valid queue found!");
 
   std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
-  std::set<uint32_t> queueFamilies = {queueIndices.presentFamily.value(),
-                                      queueIndices.graphicsFamily.value()};
+  std::set<uint32_t> queueFamilies = {_queueIndices.presentFamily.value(),
+                                      _queueIndices.graphicsFamily.value()};
 
   float queuePriority = 1.0f;
   for (uint32_t family : queueFamilies) {
@@ -36,14 +36,14 @@ void VulkanContext::createDevice() {
       .ppEnabledExtensionNames = deviceExtensions.data(),
       .pEnabledFeatures = &deviceFeatures};
 
-  if (vkCreateDevice(physicalDevice, &deviceCreateInfo, nullptr, &device) !=
+  if (vkCreateDevice(_physicalDevice, &deviceCreateInfo, nullptr, &_device) !=
       VK_SUCCESS)
     throw std::runtime_error("Failed to create logical device!");
 
-  vkGetDeviceQueue(device, queueIndices.graphicsFamily.value(), 0,
-                   &graphicsQueue);
-  vkGetDeviceQueue(device, queueIndices.presentFamily.value(), 0,
-                   &presentQueue);
+  vkGetDeviceQueue(_device, _queueIndices.graphicsFamily.value(), 0,
+                   &_graphicsQueue);
+  vkGetDeviceQueue(_device, _queueIndices.presentFamily.value(), 0,
+                   &_presentQueue);
 
   LOGD("Created logical device!");
 }

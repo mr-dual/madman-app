@@ -9,42 +9,42 @@
 //  Engine State Controls
 //====================================================================
 Engine::Engine(EngineContext &context)
-    : context(context), mGraphicsContext(std::make_unique<VulkanContext>()) {}
+    : _context(context), _graphicsContext(std::make_unique<VulkanContext>()) {}
 
-Engine::~Engine() { mGraphicsContext->cleanup(); }
+Engine::~Engine() { _graphicsContext->cleanup(); }
 
 void Engine::start() {
-  if (isRunning)
+  if (_isRunning)
     return;
 
-  mGraphicsContext->init();
+  _graphicsContext->init();
 
-  isRunning = true;
-  renderThread = std::thread(&Engine::renderLoop, this);
+  _isRunning = true;
+  _renderThread = std::thread(&Engine::renderLoop, this);
 
   return;
 }
 
 void Engine::stopRender() {
-  if (!isRunning)
+  if (!_isRunning)
     return;
 
-  isRunning = false;
+  _isRunning = false;
 
-  if (renderThread.joinable()) {
-    renderThread.join();
+  if (_renderThread.joinable()) {
+    _renderThread.join();
   }
 
-  mGraphicsContext->cleanup();
+  _graphicsContext->cleanup();
   return;
 }
 
 void Engine::resize(int w, int h) {
-  height = h;
-  width = w;
+  _height = h;
+  _width = w;
 
-  mGraphicsContext->resize(w, h);
-  LOGD("resized from cpp with dimentions %dx%d", height.load(), width.load());
+  _graphicsContext->resize(w, h);
+  LOGD("resized from cpp with dimentions %dx%d", _height.load(), _width.load());
 
   return;
 }
@@ -56,8 +56,8 @@ void Engine::resize(int w, int h) {
 void Engine::renderLoop() {
   LOGD("Render started in cpp.");
 
-  while (isRunning) {
-    mGraphicsContext->render();
+  while (_isRunning) {
+    _graphicsContext->render();
 
     std::this_thread::sleep_for(std::chrono::milliseconds(16));
   }
@@ -67,5 +67,5 @@ void Engine::renderLoop() {
 
 void Engine::setWindow(NativeWindow win) {
   window = win;
-  mGraphicsContext->setWindow(win);
+  _graphicsContext->setWindow(win);
 }

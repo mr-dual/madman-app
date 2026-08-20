@@ -11,13 +11,13 @@ protected:
   NativeWindow window = nullptr;
 
 private:
-  std::thread renderThread;
-  std::atomic<bool> isRunning{false};
-  std::atomic<int> height{0};
-  std::atomic<int> width{0};
+  std::thread _renderThread;
+  std::atomic<bool> _isRunning{false};
+  std::atomic<int> _height{0};
+  std::atomic<int> _width{0};
 
-  std::unique_ptr<GraphicsContext> mGraphicsContext;
-  EngineContext &context;
+  std::unique_ptr<GraphicsContext> _graphicsContext;
+  EngineContext &_context;
 
   void renderLoop();
 

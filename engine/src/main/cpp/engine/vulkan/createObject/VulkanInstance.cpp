@@ -49,7 +49,7 @@ void VulkanContext::createInstance() {
       .enabledExtensionCount = static_cast<uint32_t>(extensions.size()),
       .ppEnabledExtensionNames = extensions.data()};
 
-  if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {
+  if (vkCreateInstance(&createInfo, nullptr, &_instance) != VK_SUCCESS) {
     throw std::runtime_error("Failed to create Vulkan Instance");
   }
 

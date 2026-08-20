@@ -13,8 +13,8 @@ VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 void VulkanContext::createDebugMessenger() {
   auto createInfo = populateDebugUtilsMessengerCreateInfoEXT();
 
-  if (vkMethods::CreateDebugUtilsMessengerEXT(instance, &createInfo, nullptr,
-                                              &debugMessenger) != VK_SUCCESS) {
+  if (vkMethods::CreateDebugUtilsMessengerEXT(_instance, &createInfo, nullptr,
+                                              &_debugMessenger) != VK_SUCCESS) {
     throw std::runtime_error("Error: Failed to create debug messenger!");
   }
 

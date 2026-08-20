@@ -10,7 +10,7 @@
 //====================================================================
 
 void VulkanContext::init() {
-  if (instance != VK_NULL_HANDLE) {
+  if (_instance != VK_NULL_HANDLE) {
     LOGD("Instance exists, skipping creation.");
   }
 
@@ -28,31 +28,32 @@ void VulkanContext::init() {
   }
 }
 
-void VulkanContext::setWindow(const NativeWindow &win) { window = win; }
+void VulkanContext::setWindow(const NativeWindow &win) { _window = win; }
 //====================================================================
 // Cleanup Vulkan
 //====================================================================
 
 void VulkanContext::cleanup() {
-  if (swapchain != VK_NULL_HANDLE) {
-    vkDestroySwapchainKHR(device, swapchain, nullptr);
-    swapchain = VK_NULL_HANDLE;
+  if (_swapchain != VK_NULL_HANDLE) {
+    vkDestroySwapchainKHR(_device, _swapchain, nullptr);
+    _swapchain = VK_NULL_HANDLE;
   }
-  if (device != VK_NULL_HANDLE) {
-    vkDestroyDevice(device, nullptr);
-    device = VK_NULL_HANDLE;
+  if (_device != VK_NULL_HANDLE) {
+    vkDestroyDevice(_device, nullptr);
+    _device = VK_NULL_HANDLE;
   }
-  if (surface != VK_NULL_HANDLE) {
-    vkDestroySurfaceKHR(instance, surface, nullptr);
-    surface = VK_NULL_HANDLE;
+  if (_surface != VK_NULL_HANDLE) {
+    vkDestroySurfaceKHR(_instance, _surface, nullptr);
+    _surface = VK_NULL_HANDLE;
   }
-  if (debugMessenger != VK_NULL_HANDLE) {
-    vkMethods::DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);
-    debugMessenger = VK_NULL_HANDLE;
+  if (_debugMessenger != VK_NULL_HANDLE) {
+    vkMethods::DestroyDebugUtilsMessengerEXT(_instance, _debugMessenger,
+                                             nullptr);
+    _debugMessenger = VK_NULL_HANDLE;
   }
-  if (instance != VK_NULL_HANDLE) {
-    vkDestroyInstance(instance, nullptr);
-    instance = VK_NULL_HANDLE;
+  if (_instance != VK_NULL_HANDLE) {
+    vkDestroyInstance(_instance, nullptr);
+    _instance = VK_NULL_HANDLE;
   }
 }
 
