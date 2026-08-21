@@ -22,6 +22,16 @@ android {
         }
     }
 
+    androidResources {
+        ignoreAssetsPattern = "!:*.vert:*.frag:*.glsl"
+    }
+
+    sourceSets {
+        getByName("main") {
+            assets.srcDirs("src/main/cpp/shaders")
+        }
+    }
+
     externalNativeBuild {
         cmake {
             path = file("src/main/cpp/CMakeLists.txt")
