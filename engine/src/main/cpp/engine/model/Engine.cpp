@@ -1,5 +1,5 @@
 #include "Engine.hpp"
-#include "engine/context/EngineContext.hpp"
+#include "context/EngineContext.hpp"
 #include "engine/vulkan/VulkanContext.hpp"
 #include "platforms/NativeWindow.hpp"
 #include "util/Log.hpp"
@@ -17,6 +17,7 @@ void Engine::start() {
   if (_isRunning)
     return;
 
+  _graphicsContext->readFile = _context.readFile;
   _graphicsContext->init();
 
   _isRunning = true;

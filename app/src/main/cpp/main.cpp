@@ -1,13 +1,14 @@
 #include <game-activity/GameActivity.h>
 #include <game-activity/native_app_glue/android_native_app_glue.h>
 #include <game-text-input/gametextinput.h>
+#include <vector>
 
 #define APPLICATION_NAME "MadmanApp"
 #define APP_VERSION_MAJOR 0
 #define APP_VERSION_MINOR 1
 #define APP_VERSION_PATCH 0
 
-#include "engine/context/EngineContext.hpp"
+#include "context/EngineContext.hpp"
 #include "engine/model/Engine2d.hpp"
 #include "util/Log.hpp"
 
@@ -74,6 +75,21 @@ extern "C" void android_main(struct android_app *app) {
   LOGD("Madman Engine Started!");
 
   EngineContext gEngineContext;
+
+  gEngineContext.readFile = [&app](const char *filename) {
+    AAsset *asset = AAssetManager_open(app->activity->assetManager, filename,
+                                       AASSET_MODE_BUFFER);
+    if (!asset)
+      return std::vector<char>{};
+
+    size_t size = AAsset_getLength(asset);
+    std::vector<char> buffer(size);
+    AAsset_read(asset, buffer.data(), size);
+    AAsset_close(asset);
+
+    return buffer;
+  };
+
   Engine2d gEngine(gEngineContext);
 
   app->userData = &gEngine;
