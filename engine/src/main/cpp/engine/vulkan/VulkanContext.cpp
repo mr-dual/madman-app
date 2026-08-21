@@ -22,6 +22,8 @@ void VulkanContext::init() {
     pickPhysicalDevice();
     createDevice();
     createSwapchain();
+    createImageViews();
+    createGraphicsPipeline();
 
   } catch (const std::exception &err) {
     LOGE("Error: %s", err.what());

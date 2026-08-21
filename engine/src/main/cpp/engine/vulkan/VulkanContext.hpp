@@ -1,6 +1,6 @@
 #pragma once
 
-#include "engine/context/GraphicsContext.hpp"
+#include "context/GraphicsContext.hpp"
 #include "platforms/NativeWindow.hpp"
 #include "vulkan/vulkan_core.h"
 #include <optional>
