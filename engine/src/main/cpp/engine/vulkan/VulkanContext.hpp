@@ -50,6 +50,7 @@ private:
   void createSurface();
   void createSwapchain();
   void createImageViews();
+  void createGraphicsPipeline();
 
   // Debug Messenger
   VkDebugUtilsMessengerCreateInfoEXT populateDebugUtilsMessengerCreateInfoEXT();
