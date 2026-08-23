@@ -42,6 +42,8 @@ private:
   VkExtent2D _extent;
   std::vector<VkImageView> _imageViews;
 
+  VkPipelineLayout _pipelineLayout = VK_NULL_HANDLE;
+
   NativeWindow _window = nullptr;
 
   void createInstance();
