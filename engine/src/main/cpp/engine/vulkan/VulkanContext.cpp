@@ -24,6 +24,7 @@ void VulkanContext::init() {
     createDevice();
     createSwapchain();
     createImageViews();
+    createRenderPass();
     createGraphicsPipeline();
 
   } catch (const std::exception &err) {
@@ -42,6 +43,11 @@ void VulkanContext::cleanup() {
     if (_pipelineLayout != VK_NULL_HANDLE) {
       vkDestroyPipelineLayout(_device, _pipelineLayout, nullptr);
       _pipelineLayout = VK_NULL_HANDLE;
+    }
+
+    if (_renderPass != VK_NULL_HANDLE) {
+      vkDestroyRenderPass(_device, _renderPass, nullptr);
+      _renderPass = VK_NULL_HANDLE;
     }
 
     for (const auto &view : _imageViews) {

@@ -42,6 +42,7 @@ private:
   VkExtent2D _extent;
   std::vector<VkImageView> _imageViews;
 
+  VkRenderPass _renderPass = VK_NULL_HANDLE;
   VkPipelineLayout _pipelineLayout = VK_NULL_HANDLE;
 
   NativeWindow _window = nullptr;
@@ -52,6 +53,7 @@ private:
   void createSurface();
   void createSwapchain();
   void createImageViews();
+  void createRenderPass();
   void createGraphicsPipeline();
 
   // Debug Messenger
