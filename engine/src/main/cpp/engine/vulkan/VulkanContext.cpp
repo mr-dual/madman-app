@@ -40,6 +40,11 @@ void VulkanContext::setWindow(const NativeWindow &win) { _window = win; }
 
 void VulkanContext::cleanup() {
   if (_device != VK_NULL_HANDLE) {
+    if (_graphicsPipeline != VK_NULL_HANDLE) {
+      vkDestroyPipeline(_device, _graphicsPipeline, nullptr);
+      _graphicsPipeline = VK_NULL_HANDLE;
+    }
+
     if (_pipelineLayout != VK_NULL_HANDLE) {
       vkDestroyPipelineLayout(_device, _pipelineLayout, nullptr);
       _pipelineLayout = VK_NULL_HANDLE;

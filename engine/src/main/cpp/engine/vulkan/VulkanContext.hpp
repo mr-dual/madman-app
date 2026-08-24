@@ -44,6 +44,7 @@ private:
 
   VkRenderPass _renderPass = VK_NULL_HANDLE;
   VkPipelineLayout _pipelineLayout = VK_NULL_HANDLE;
+  VkPipeline _graphicsPipeline = VK_NULL_HANDLE;
 
   NativeWindow _window = nullptr;
 
