@@ -33,6 +33,11 @@ void VulkanContext::createGraphicsPipeline() {
   VkPipelineShaderStageCreateInfo shaderStages[] = {vertShaderStageInfo,
                                                     fragShaderStageInfo};
 
+  auto destroyShader = [&]() {
+    vkDestroyShaderModule(_device, vertShaderModule, nullptr);
+    vkDestroyShaderModule(_device, fragShaderModule, nullptr);
+  };
+
   std::vector<VkDynamicState> dynamicState{VK_DYNAMIC_STATE_VIEWPORT,
                                            VK_DYNAMIC_STATE_SCISSOR};
 
@@ -96,8 +101,31 @@ void VulkanContext::createGraphicsPipeline() {
       .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO};
 
   if (vkCreatePipelineLayout(_device, &pipelineLayoutInfo, nullptr,
-                             &_pipelineLayout) != VK_SUCCESS)
+                             &_pipelineLayout) != VK_SUCCESS) {
+    destroyShader();
     throw std::runtime_error("Failed to create Pipeline Layout!");
+  }
+
+  VkGraphicsPipelineCreateInfo createInfo{
+      .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
+      .stageCount = 2,
+      .pStages = shaderStages,
+      .pVertexInputState = &vertexInputInfo,
+      .pInputAssemblyState = &inputAssemblyInfo,
+      .pViewportState = &viewportStateInfo,
+      .pRasterizationState = &rasterizationStateInfo,
+      .pMultisampleState = &multisampleStateInfo,
+      .pColorBlendState = &colorBlending,
+      .pDynamicState = &dynamicStateInfo,
+      .layout = _pipelineLayout,
+      .renderPass = _renderPass,
+      .subpass = 0};
+
+  if (vkCreateGraphicsPipelines(_device, VK_NULL_HANDLE, 1, &createInfo,
+                                nullptr, &_graphicsPipeline) != VK_SUCCESS) {
+    destroyShader();
+    throw std::runtime_error("Failed to create Graphics Pipeline!");
+  }
 
   vkDestroyShaderModule(_device, vertShaderModule, nullptr);
   vkDestroyShaderModule(_device, fragShaderModule, nullptr);
