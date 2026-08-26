@@ -26,6 +26,7 @@ void VulkanContext::init() {
     createImageViews();
     createRenderPass();
     createGraphicsPipeline();
+    createFrameBuffers();
 
   } catch (const std::exception &err) {
     LOGE("Error: %s", err.what());
@@ -40,6 +41,11 @@ void VulkanContext::setWindow(const NativeWindow &win) { _window = win; }
 
 void VulkanContext::cleanup() {
   if (_device != VK_NULL_HANDLE) {
+    for (const auto &framebuffer : _framebuffers) {
+      if (framebuffer != VK_NULL_HANDLE)
+        vkDestroyFramebuffer(_device, framebuffer, nullptr);
+    }
+
     if (_graphicsPipeline != VK_NULL_HANDLE) {
       vkDestroyPipeline(_device, _graphicsPipeline, nullptr);
       _graphicsPipeline = VK_NULL_HANDLE;
