@@ -13,7 +13,7 @@ void VulkanContext::createGraphicsPipeline() {
   auto fragShaderCode = readFile("shader.frag.spv");
 
   if (vertShaderCode.empty() || fragShaderCode.empty())
-    throw std::runtime_error("Shader not loaded!");
+    throw std::runtime_error("Shaders not loaded!");
 
   auto vertShaderModule = createShaderModule(_device, vertShaderCode);
   auto fragShaderModule = createShaderModule(_device, fragShaderCode);
@@ -41,13 +41,13 @@ void VulkanContext::createGraphicsPipeline() {
   std::vector<VkDynamicState> dynamicState{VK_DYNAMIC_STATE_VIEWPORT,
                                            VK_DYNAMIC_STATE_SCISSOR};
 
-  VkPipelineVertexInputStateCreateInfo vertexInputInfo{
-      .sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO};
-
   VkPipelineDynamicStateCreateInfo dynamicStateInfo{
       .sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO,
       .dynamicStateCount = static_cast<uint32_t>(dynamicState.size()),
       .pDynamicStates = dynamicState.data()};
+
+  VkPipelineVertexInputStateCreateInfo vertexInputInfo{
+      .sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO};
 
   VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo{
       .sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
@@ -86,7 +86,6 @@ void VulkanContext::createGraphicsPipeline() {
       .sampleShadingEnable = VK_FALSE};
 
   VkPipelineColorBlendAttachmentState colorBlendAttachment{
-
       .blendEnable = VK_FALSE,
       .colorWriteMask = VK_COLOR_COMPONENT_A_BIT | VK_COLOR_COMPONENT_R_BIT |
                         VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT};
@@ -127,8 +126,7 @@ void VulkanContext::createGraphicsPipeline() {
     throw std::runtime_error("Failed to create Graphics Pipeline!");
   }
 
-  vkDestroyShaderModule(_device, vertShaderModule, nullptr);
-  vkDestroyShaderModule(_device, fragShaderModule, nullptr);
+  destroyShader();
 }
 
 namespace {

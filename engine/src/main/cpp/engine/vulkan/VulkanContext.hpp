@@ -41,7 +41,9 @@ private:
   VkFormat _imageFormat;
   VkExtent2D _extent;
   std::vector<VkImageView> _imageViews;
+  std::vector<VkFramebuffer> _framebuffers;
 
+  // Graphics Pipelind
   VkRenderPass _renderPass = VK_NULL_HANDLE;
   VkPipelineLayout _pipelineLayout = VK_NULL_HANDLE;
   VkPipeline _graphicsPipeline = VK_NULL_HANDLE;
@@ -56,6 +58,7 @@ private:
   void createImageViews();
   void createRenderPass();
   void createGraphicsPipeline();
+  void createFrameBuffers();
 
   // Debug Messenger
   VkDebugUtilsMessengerCreateInfoEXT populateDebugUtilsMessengerCreateInfoEXT();
